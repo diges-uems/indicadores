@@ -6,6 +6,7 @@ import { grauMap } from '@/data/grau-map';
 import { statusConfig } from '@/lib/sinaes/status-config';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { statusColors, shortLabels, longLabels } from '@/lib/sinaes/status-config';
+import { Users, UserCheck, TrendingUp, AlertTriangle } from 'lucide-react';
 
 const COLORS = [statusColors[1], statusColors[2], statusColors[3], statusColors[4], statusColors[5]];
 
@@ -20,7 +21,7 @@ export function Enade2025Tab() {
   const [filterArea, setFilterArea] = useState('');
   const [filterCampus, setFilterCampus] = useState('');
   const [filterConceito, setFilterConceito] = useState('');
-  const [sortCol, setSortCol] = useState<'area' | 'municipio' | 'conceito'>('conceito');
+  const [sortCol, setSortCol] = useState<'area' | 'municipio' | 'conceito' | 'percentual'>('conceito');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   const uniqueAreas = useMemo(
@@ -32,12 +33,20 @@ export function Enade2025Tab() {
     []
   );
 
-  const { chartData, counts, total } = useMemo(() => {
+  const { chartData, counts, total, totalInscritos, totalParticipantes, totalAcimaBasico } = useMemo(() => {
     const c: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    let t = 0;
+    let insc = 0;
+    let part = 0;
+    let acima = 0;
+
     enade2025Data.forEach(d => {
       c[d.conceito]++;
+      t++;
+      insc += d.concluintesInscritos;
+      part += d.concluintesParticipantes;
+      acima += d.concluinteAcimaBasico;
     });
-    const t = enade2025Data.length;
 
     const data: ChartDataItem[] = [1, 2, 3, 4, 5].map(i => ({
       name: longLabels[i - 1],
@@ -46,7 +55,7 @@ export function Enade2025Tab() {
       concept: i,
     }));
 
-    return { chartData: data, counts: c, total: t };
+    return { chartData: data, counts: c, total: t, totalInscritos: insc, totalParticipantes: part, totalAcimaBasico: acima };
   }, []);
 
   const filteredData = useMemo(() => {
@@ -61,6 +70,7 @@ export function Enade2025Tab() {
       let cmp = 0;
       if (sortCol === 'area') cmp = a.area.localeCompare(b.area);
       else if (sortCol === 'municipio') cmp = a.municipio.localeCompare(b.municipio);
+      else if (sortCol === 'percentual') cmp = a.percentualAcimaPadrao1 - b.percentualAcimaPadrao1;
       else cmp = a.conceito - b.conceito;
       return sortDir === 'asc' ? cmp : -cmp;
     });
@@ -68,21 +78,21 @@ export function Enade2025Tab() {
     return filtered;
   }, [filterArea, filterCampus, filterConceito, sortCol, sortDir]);
 
-  const handleSort = (col: 'area' | 'municipio' | 'conceito') => {
+  const handleSort = (col: typeof sortCol) => {
     if (sortCol === col) {
       setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortCol(col);
-      setSortDir(col === 'conceito' ? 'asc' : 'asc');
+      setSortDir(col === 'conceito' || col === 'percentual' ? 'asc' : 'asc');
     }
   };
 
-  const getSortIndicator = (col: 'area' | 'municipio' | 'conceito') => {
-    if (col !== sortCol) return <span className="text-slate-500 text-xs">↕</span>;
+  const getSortIndicator = (col: typeof sortCol) => {
+    if (col !== sortCol) return <span className="text-slate-400 text-xs ml-0.5">↕</span>;
     return sortDir === 'asc' ? (
-      <span className="text-blue-900 text-sm font-black">↑</span>
+      <span className="text-blue-900 text-sm font-black ml-0.5">↑</span>
     ) : (
-      <span className="text-blue-900 text-sm font-black">↓</span>
+      <span className="text-blue-900 text-sm font-black ml-0.5">↓</span>
     );
   };
 
@@ -97,6 +107,7 @@ export function Enade2025Tab() {
   const insuficienteCount = counts[1] + counts[2];
   const bomPct = total > 0 ? Math.round((bomCount / total) * 100) : 0;
   const insuficientePct = total > 0 ? Math.round((insuficienteCount / total) * 100) : 0;
+  const globalPercentual = totalParticipantes > 0 ? (totalAcimaBasico / totalParticipantes) : 0;
 
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: ChartDataItem }> }) => {
     if (active && payload && payload.length) {
@@ -116,7 +127,7 @@ export function Enade2025Tab() {
   return (
     <div className="animate-fade-in space-y-6">
       {/* Summary Cards */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total courses */}
         <div className="bg-white rounded-[2rem] p-6 bento-shadow border border-gray-100 flex flex-col justify-between">
           <div className="flex justify-between items-start mb-3">
@@ -125,11 +136,11 @@ export function Enade2025Tab() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
-            <span className="bg-[#00338C] text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest">
+            <span className="bg-[#00338C] text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">
               ENADE 2025
             </span>
           </div>
-          <p className="text-sm font-black text-slate-950 uppercase tracking-widest mb-1">
+          <p className="text-xs font-black text-slate-950 uppercase tracking-widest mb-1">
             Cursos Avaliados
           </p>
           <div className="flex items-baseline gap-2">
@@ -140,19 +151,38 @@ export function Enade2025Tab() {
           </div>
         </div>
 
+        {/* Concluintes */}
+        <div className="bg-white rounded-[2rem] p-6 bento-shadow border border-gray-100 flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm">
+              <Users className="w-5 h-5" />
+            </div>
+            <span className="bg-blue-600 text-white text-lg font-black px-3 py-1 rounded-full shadow-lg shadow-blue-100">
+              {totalParticipantes}
+            </span>
+          </div>
+          <p className="text-xs font-black text-slate-950 uppercase tracking-widest mb-1">
+            Concluintes Participantes
+          </p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-5xl font-black text-slate-950 tracking-tighter leading-none">
+              {totalInscritos}
+            </p>
+            <p className="text-sm font-semibold text-slate-500 uppercase">inscritos</p>
+          </div>
+        </div>
+
         {/* Bom/Muito Bom */}
         <div className="bg-white rounded-[2rem] p-6 bento-shadow border border-gray-100 flex flex-col justify-between">
           <div className="flex justify-between items-start mb-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <UserCheck className="w-5 h-5" />
             </div>
             <span className="bg-emerald-600 text-white text-lg font-black px-3 py-1 rounded-full shadow-lg shadow-green-100">
               {bomPct}%
             </span>
           </div>
-          <p className="text-sm font-black text-slate-950 uppercase tracking-widest mb-1">
+          <p className="text-xs font-black text-slate-950 uppercase tracking-widest mb-1">
             Conceitos 4 e 5
           </p>
           <div className="flex items-baseline gap-2">
@@ -171,15 +201,13 @@ export function Enade2025Tab() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600" />
               </span>
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
+              <AlertTriangle className="w-5 h-5" />
             </div>
             <span className="bg-red-600 text-white text-lg font-black px-3 py-1 rounded-full shadow-lg shadow-red-100">
               {insuficientePct}%
             </span>
           </div>
-          <p className="text-sm font-black text-slate-950 uppercase tracking-widest mb-1">
+          <p className="text-xs font-black text-slate-950 uppercase tracking-widest mb-1">
             Conceitos 1 e 2
           </p>
           <div className="flex items-baseline gap-2">
@@ -187,6 +215,32 @@ export function Enade2025Tab() {
               {insuficienteCount}
             </p>
             <p className="text-sm font-semibold text-slate-500 uppercase">cursos</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Performance Overview Bar */}
+      <section className="bg-white rounded-[2rem] p-6 bento-shadow border border-gray-100">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="flex-1 w-full">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-black text-slate-950 uppercase tracking-widest">
+                Desempenho Global — Acima do Padrão 1
+              </p>
+              <p className="text-2xl font-black text-[#00338C]">
+                {(globalPercentual * 100).toFixed(1)}%
+              </p>
+            </div>
+            <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-blue-700 to-cyan-500 rounded-full transition-all duration-700"
+                style={{ width: `${globalPercentual * 100}%` }}
+              />
+            </div>
+            <div className="flex justify-between mt-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+              <span>{totalAcimaBasico} concluintes acima do básico</span>
+              <span>{totalParticipantes} participantes de {totalInscritos} inscritos</span>
+            </div>
           </div>
         </div>
       </section>
@@ -258,13 +312,13 @@ export function Enade2025Tab() {
       </section>
 
       {/* Course Table */}
-      <section className="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 mb-10 overflow-hidden">
+      <section className="bg-white rounded-[2rem] p-6 md:p-8 bento-shadow border border-gray-100 mb-10 overflow-hidden">
         <div className="mb-6">
           <h3 className="text-2xl font-black text-[#00338C] tracking-tight uppercase">
             Monitoramento ENADE 2025
           </h3>
           <p className="text-sm text-slate-500 font-medium mt-1">
-            Conceitos padronizados (notas inteiras) dos cursos avaliados no ENADE 2025.
+            Dados oficiais INEP — Conceitos padronizados e indicadores de desempenho dos concluintes.
           </p>
         </div>
 
@@ -319,29 +373,53 @@ export function Enade2025Tab() {
         </div>
 
         {/* Table */}
-        <div className="w-full overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
-          <table className="w-full text-base text-left">
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-sm text-left min-w-[900px]">
             <thead>
-              <tr className="bg-slate-50 text-slate-950 border-b border-gray-200 uppercase font-black text-sm tracking-widest">
+              <tr className="bg-slate-50 text-slate-950 border-b border-gray-200 uppercase font-black text-[10px] tracking-widest">
                 <th
-                  className="py-4 px-6 cursor-pointer hover:text-blue-900 w-[40%]"
+                  className="py-4 px-3 cursor-pointer hover:text-blue-900 w-[22%]"
                   onClick={() => handleSort('area')}
                 >
                   Curso {getSortIndicator('area')}
                 </th>
                 <th
-                  className="py-4 px-6 text-center cursor-pointer hover:text-blue-900 w-[25%]"
+                  className="py-4 px-3 text-center cursor-pointer hover:text-blue-900 w-[12%]"
                   onClick={() => handleSort('municipio')}
                 >
-                  Unid. Universitária {getSortIndicator('municipio')}
+                  Unid. Univ. {getSortIndicator('municipio')}
                 </th>
                 <th
-                  className="py-4 px-6 text-center cursor-pointer hover:text-blue-900 w-[20%]"
+                  className="py-4 px-3 text-center cursor-pointer hover:text-blue-900 w-[10%]"
                   onClick={() => handleSort('conceito')}
                 >
-                  Conceito ENADE {getSortIndicator('conceito')}
+                  Conceito {getSortIndicator('conceito')}
                 </th>
-                <th className="py-4 px-6 text-center w-[15%]">Status</th>
+                <th className="py-4 px-3 text-center w-[8%]">Status</th>
+                <th className="py-4 px-3 text-center w-[8%]">
+                  <span className="inline-flex items-center gap-1">
+                    <Users className="w-3 h-3" />
+                    Inscritos
+                  </span>
+                </th>
+                <th className="py-4 px-3 text-center w-[8%]">
+                  <span className="inline-flex items-center gap-1">
+                    <UserCheck className="w-3 h-3" />
+                    Partic.
+                  </span>
+                </th>
+                <th className="py-4 px-3 text-center w-[8%]">
+                  <span className="inline-flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    Acima Básico
+                  </span>
+                </th>
+                <th
+                  className="py-4 px-3 text-center cursor-pointer hover:text-blue-900 w-[12%]"
+                  onClick={() => handleSort('percentual')}
+                >
+                  % Acima Padrão 1 {getSortIndicator('percentual')}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -350,39 +428,77 @@ export function Enade2025Tab() {
                 const st = statusConfig[d.conceito] || { label: 'S/D', cl: 'bg-slate-400' };
                 const statusTextColor =
                   d.conceito >= 3 && d.conceito <= 4 ? 'text-slate-900' : 'text-white';
+                const pctFormatted = (d.percentualAcimaPadrao1 * 100).toFixed(1).replace('.', ',');
+                const participacaoRate = d.concluintesInscritos > 0 
+                  ? ((d.concluintesParticipantes / d.concluintesInscritos) * 100).toFixed(0) 
+                  : '0';
 
                 return (
                   <tr
                     key={d.codigo}
                     className="hover:bg-blue-50 transition-colors border-b border-slate-100"
                   >
-                    <td className="py-3.5 px-6">
+                    <td className="py-3 px-3">
                       <div className="flex flex-col">
-                        <span className="font-black text-blue-950">
+                        <span className="font-black text-blue-950 text-xs leading-tight">
                           {d.area}{grau}
                         </span>
-                        <span className="text-xs font-bold uppercase text-slate-500 tracking-wider mt-0.5">
-                          CÓD: {d.codigo}
+                        <span className="text-[9px] font-bold uppercase text-slate-500 tracking-wider mt-0.5">
+                          CÓD: {d.codigo} • ÁREA: {d.codigoArea} • {d.modalidade}
                         </span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-6 text-center font-black uppercase text-sm">
+                    <td className="py-3 px-3 text-center font-black uppercase text-[10px]">
                       {d.municipio}
                     </td>
-                    <td className="py-3.5 px-6 text-center">
+                    <td className="py-3 px-3 text-center">
                       <div
-                        className="inline-flex items-center justify-center w-14 h-14 rounded-xl text-white font-black text-2xl shadow-md"
+                        className="inline-flex items-center justify-center w-11 h-11 rounded-lg text-white font-black text-xl shadow-md"
                         style={{ backgroundColor: COLORS[d.conceito - 1] }}
                       >
                         {d.conceito}
                       </div>
                     </td>
-                    <td className="py-3.5 px-6 text-center">
+                    <td className="py-3 px-3 text-center">
                       <span
-                        className={`px-3 py-1.5 ${st.cl} ${statusTextColor} rounded-lg text-xs font-black uppercase tracking-wider inline-block`}
+                        className={`px-2 py-1 ${st.cl} ${statusTextColor} rounded-md text-[9px] font-black uppercase tracking-wider inline-block`}
                       >
                         {st.label}
                       </span>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <span className="font-black text-slate-800 text-sm">{d.concluintesInscritos}</span>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <div className="flex flex-col items-center">
+                        <span className="font-black text-slate-800 text-sm">{d.concluintesParticipantes}</span>
+                        <span className="text-[9px] font-bold text-slate-400">({participacaoRate}%)</span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <span className="font-black text-slate-800 text-sm">{d.concluinteAcimaBasico}</span>
+                    </td>
+                    <td className="py-3 px-3 text-center">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="font-black text-sm" style={{
+                          color: d.percentualAcimaPadrao1 >= 0.7 ? '#16A34A' 
+                            : d.percentualAcimaPadrao1 >= 0.5 ? '#EAB308' 
+                            : '#DC2626'
+                        }}>
+                          {pctFormatted}%
+                        </span>
+                        <div className="w-full max-w-[80px] h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-500"
+                            style={{
+                              width: `${d.percentualAcimaPadrao1 * 100}%`,
+                              backgroundColor: d.percentualAcimaPadrao1 >= 0.7 ? '#16A34A' 
+                                : d.percentualAcimaPadrao1 >= 0.5 ? '#EAB308' 
+                                : '#DC2626'
+                            }}
+                          />
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 );

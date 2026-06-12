@@ -18,7 +18,7 @@ interface CampusDataItem {
 
 export function CampusCharts({ onExpand, maxYear = 2025 }: CampusChartsProps) {
   const campusData = useMemo(() => {
-    const allData = processCourseData(maxYear);
+    const allData = processCourseData(maxYear, true);
     const map: Record<string, { s: number; c: number }> = {};
 
     allData.forEach(r => {

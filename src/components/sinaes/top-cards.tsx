@@ -12,7 +12,7 @@ interface TopCardsProps {
 }
 
 export function TopCards({ maxYear = 2025 }: TopCardsProps) {
-  const allData = useMemo(() => processCourseData(maxYear), [maxYear]);
+  const allData = useMemo(() => processCourseData(maxYear, true), [maxYear]);
 
   const { highlightCount, criticalCount, highlightPercentage, criticalPercentage, highlightMap, criticalMap } = useMemo(() => {
     let hl = 0;

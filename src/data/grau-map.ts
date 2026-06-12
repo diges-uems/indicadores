@@ -4,7 +4,7 @@ export const grauMap: Record<string, string> = {
   '68265': 'Licenciatura',
   '45713': 'Licenciatura',
   '45715': 'Licenciatura',
-  '45716': 'Licenciatura',
+
   '50933': 'Licenciatura',
   '123588': 'Licenciatura',
   '105780': 'Licenciatura',

@@ -21,7 +21,7 @@ interface EnadePieChartProps {
 
 export function EnadePieChart({ maxYear = 2025 }: EnadePieChartProps) {
   const { chartData, totalCounts } = useMemo(() => {
-    const allData = processCourseData(maxYear);
+    const allData = processCourseData(maxYear, true);
     const counts: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     let total = 0;
 

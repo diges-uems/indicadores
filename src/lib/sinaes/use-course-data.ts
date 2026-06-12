@@ -10,14 +10,19 @@ export interface ProcessedCourseData extends CourseDataRaw {
   fn: number | null;
 }
 
-export function processCourseData(maxYear: number = 2025): ProcessedCourseData[] {
-  return courseDataRaw.map(r => {
+export function processCourseData(maxYear: number = 2025, filterNoData: boolean = false): ProcessedCourseData[] {
+  const result = courseDataRaw.map(r => {
     const en = getLatestValue(r as unknown as Record<string, unknown>, 'enade', maxYear);
     const cp = getLatestValue(r as unknown as Record<string, unknown>, 'cpc', maxYear);
     const id = getLatestValue(r as unknown as Record<string, unknown>, 'idd', maxYear);
     const fn = convertToRange(cp) ?? convertToRange(en);
     return { ...r, en, cp, id, fn };
   });
+
+  if (filterNoData) {
+    return result.filter(r => r.en !== null || r.cp !== null || r.id !== null);
+  }
+  return result;
 }
 
 export function getCourseName(area: string, codigo: string): string {

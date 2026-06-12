@@ -16,7 +16,7 @@ type SortColumn = 'en' | 'id' | 'cp';
 type SortDirection = 'asc' | 'desc';
 
 export function CourseTable({ onCourseClick, maxYear = 2025 }: CourseTableProps) {
-  const allData = useMemo(() => processCourseData(maxYear), [maxYear]);
+  const allData = useMemo(() => processCourseData(maxYear, true), [maxYear]);
 
   const [filterCourse, setFilterCourse] = useState('');
   const [filterGrau, setFilterGrau] = useState('');
