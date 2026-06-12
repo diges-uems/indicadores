@@ -1,0 +1,527 @@
+     1→     1→'use client';
+     2→     2→
+     3→     3→import { useMemo } from 'react';
+     4→     4→import {
+     5→     5→  Dialog,
+     6→     6→  DialogContent,
+     7→     7→  DialogTitle,
+     8→     8→  DialogDescription,
+     9→     9→} from '@/components/ui/dialog';
+    10→    10→import { processCourseData, getCourseName, getCleanArea, type ProcessedCourseData } from '@/lib/sinaes/use-course-data';
+    11→    11→import { grauMap } from '@/data/grau-map';
+    12→    12→import { nationalBenchmarks } from '@/data/national-benchmarks';
+    13→    13→import { convertToRange } from '@/lib/sinaes/converters';
+    14→    14→import { statusConfig } from '@/lib/sinaes/status-config';
+    15→    15→import { Printer, X } from 'lucide-react';
+    16→    16→
+    17→    17→interface CourseModalProps {
+    18→    18→  codigo: string | null;
+    19→    19→  open: boolean;
+    20→    20→  onClose: () => void;
+    21→    21→}
+    22→    22→
+    23→    23→function ComparisonCard({
+    24→    24→  title,
+    25→    25→  v,
+    26→    26→  n,
+    27→    27→}: {
+    28→    28→  title: string;
+    29→    29→  v: number | null;
+    30→    30→  n: number | null | undefined;
+    31→    31→}) {
+    32→    32→  if (v == null) {
+    33→    33→    return (
+    34→    34→      <div className="bg-slate-50 rounded-xl p-4 border text-center text-xs font-black uppercase text-slate-500 flex items-center justify-center break-inside-avoid">
+    35→    35→        {title} Indisponível
+    36→    36→      </div>
+    37→    37→    );
+    38→    38→  }
+    39→    39→
+    40→    40→  const d = n != null ? v - n : 0;
+    41→    41→  const isP = d >= 0;
+    42→    42→  const faixa = convertToRange(v);
+    43→    43→  const faixaClass = statusConfig[faixa ?? 0]?.cl || 'bg-slate-400';
+    44→    44→
+    45→    45→  return (
+    46→    46→    <div className="bg-white rounded-2xl p-6 border border-slate-300 shadow-sm relative overflow-hidden break-inside-avoid">
+    47→    47→      <div className="flex justify-between items-start mb-4">
+    48→    48→        <h4 className="text-xs font-black uppercase text-slate-500 tracking-widest">
+    49→    49→          {title}
+    50→    50→        </h4>
+    51→    51→        {n != null ? (
+    52→    52→          <span
+    53→    53→            className={`inline-block ${
+    54→    54→              isP ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'
+    55→    55→            } px-2 py-0.5 rounded shadow-sm border font-black text-[10px] uppercase`}
+    56→    56→          >
+    57→    57→            {isP ? '↑' : '↓'} {Math.abs(d).toFixed(2)} vs Nac.
+    58→    58→          </span>
+    59→    59→        ) : (
+    60→    60→          <span className="text-[10px] font-black text-slate-500 uppercase">
+    61→    61→            Sem Ref.
+    62→    62→          </span>
+    63→    63→        )}
+    64→    64→      </div>
+    65→    65→      <div className="flex justify-between items-end mb-2">
+    66→    66→        <div className="flex flex-col items-start gap-1">
+    67→    67→          <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
+    68→    68→            Contínuo
+    69→    69→          </span>
+    70→    70→          <div className="flex items-baseline gap-1">
+    71→    71→            <span className="text-4xl font-black text-slate-900" title="Nota Contínua">
+    72→    72→              {v.toFixed(3)}
+    73→    73→            </span>
+    74→    74→            <span className="text-sm font-black text-slate-400">/ 5.0</span>
+    75→    75→          </div>
+    76→    76→        </div>
+    77→    77→        <div className="text-right flex flex-col items-center">
+    78→    78→          <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+    79→    79→            Conceito
+    80→    80→          </p>
+    81→    81→          <div
+    82→    82→            className={`flex items-center justify-center w-10 h-10 rounded-2xl text-white font-black text-2xl shadow-lg border border-white/20 ${faixaClass}`}
+    83→    83→          >
+    84→    84→            {faixa}
+    85→    85→          </div>
+    86→    86→        </div>
+    87→    87→      </div>
+    88→    88→      <div className="h-2 bg-slate-200 rounded-full mt-4 overflow-hidden relative w-full">
+    89→    89→        <div
+    90→    90→          className={`absolute top-0 left-0 h-full ${faixaClass}`}
+    91→    91→          style={{ width: `${(v / 5) * 100}%` }}
+    92→    92→        />
+    93→    93→        {n != null && (
+    94→    94→          <div
+    95→    95→            className="absolute top-[-2px] bottom-[-2px] w-1.5 bg-slate-900 rounded-full shadow-md z-10 border border-white"
+    96→    96→            style={{ left: `${(n / 5) * 100}%` }}
+    97→    97→          />
+    98→    98→        )}
+    99→    99→      </div>
+   100→   100→      <div className="flex justify-between mt-2">
+   101→   101→        <span className="text-[10px] font-black text-slate-500 uppercase">
+   102→   102→          Seu Curso
+   103→   103→        </span>
+   104→   104→        {n != null && (
+   105→   105→          <span className="text-[10px] font-black text-slate-500 uppercase">
+   106→   106→            Média Nac. ({n.toFixed(2)})
+   107→   107→          </span>
+   108→   108→        )}
+   109→   109→      </div>
+   110→   110→    </div>
+   111→   111→  );
+   112→   112→}
+   113→   113→
+   114→   114→function HistoricalRow({
+   115→   115→  label,
+   116→   116→  record,
+   117→   117→  prefix,
+   118→   118→}: {
+   119→   119→  label: string;
+   120→   120→  record: ProcessedCourseData;
+   121→   121→  prefix: string;
+   122→   122→}) {
+   123→   123→  const years = [2021, 2022, 2023, 2024, 2025];
+   124→   124→  const values = years.map(y => (record as unknown as Record<string, unknown>)[`${prefix}${y}`] as number | undefined);
+   125→   125→  const d = values[0] != null && values[4] != null ? values[4]! - values[0]! : 0;
+   126→   126→
+   127→   127→  return (
+   128→   128→    <tr>
+   129→   129→      <td className="font-black py-5 px-10 uppercase text-sm text-slate-950 text-left">
+   130→   130→        {label}
+   131→   131→      </td>
+   132→   132→      {values.map((v, idx) => {
+   133→   133→        const faixa = v != null ? convertToRange(v) : null;
+   134→   134→        const faixaClass = faixa != null ? statusConfig[faixa]?.cl || '' : '';
+   135→   135→        const textColor =
+   136→   136→          faixa === 3 || faixa === 4 ? 'text-slate-950' : 'text-white';
+   137→   137→
+   138→   138→        return (
+   139→   139→          <td
+   140→   140→            key={idx}
+   141→   141→            className={`py-3 px-1 sm:py-5 sm:px-3 ${idx >= 3 ? 'bg-slate-200' : ''}`}
+   142→   142→          >
+   143→   143→            <span
+   144→   144→              className={`inline-block px-1.5 py-1 sm:px-3 sm:py-1.5 rounded-lg font-black text-sm border border-slate-300 ${
+   145→   145→                v != null
+   146→   146→                  ? `${faixaClass} ${textColor} shadow-md`
+   147→   147→                  : 'bg-slate-100 text-slate-950'
+   148→   148→              }`}
+   149→   149→            >
+   150→   150→              {v == null ? '-' : Number(v).toFixed(3)}
+   151→   151→            </span>
+   152→   152→          </td>
+   153→   153→        );
+   154→   154→      })}
+   155→   155→      <td
+   156→   156→        className={`text-center py-3 px-1 sm:py-5 sm:px-3 font-black text-sm ${
+   157→   157→          d > 0
+   158→   158→            ? 'text-green-800'
+   159→   159→            : d < 0
+   160→   160→            ? 'text-red-800'
+   161→   161→            : 'text-slate-950'
+   162→   162→        }`}
+   163→   163→      >
+   164→   164→        {d ? (d > 0 ? '+' : '') + d.toFixed(3) : '-'}
+   165→   165→      </td>
+   166→   166→    </tr>
+   167→   167→  );
+   168→   168→}
+   169→   169→
+   170→   170→function formatNum(v: number | null | undefined): string {
+   171→   171→  return v == null ? '-' : Number(v).toFixed(3).replace('.', ',');
+   172→   172→}
+   173→   173→
+   174→   174→function formatConcept(v: number | null | undefined): string {
+   175→   175→  if (v == null) return '-';
+   176→   176→  const r = convertToRange(v);
+   177→   177→  if (r === 1) return '1 - Não atende';
+   178→   178→  if (r === 2) return '2 - Insuficiente';
+   179→   179→  if (r === 3) return '3 - Suficiente';
+   180→   180→  if (r === 4) return '4 - Bom';
+   181→   181→  if (r === 5) return '5 - Muito bom';
+   182→   182→  return '-';
+   183→   183→}
+   184→   184→
+   185→   185→function formatSit(v: number | null, n: number | null | undefined): string {
+   186→   186→  if (v == null || n == null) return 'Sem Referência';
+   187→   187→  const diff = v - n;
+   188→   188→  if (diff >= 0) return `Acima da Média (↑ ${diff.toFixed(2).replace('.', ',')})`;
+   189→   189→  return `Abaixo da Média (↓ ${Math.abs(diff).toFixed(2).replace('.', ',')})`;
+   190→   190→}
+   191→   191→
+   192→   192→function PrintHistoricalRow({
+   193→   193→  label,
+   194→   194→  record,
+   195→   195→  prefix,
+   196→   196→}: {
+   197→   197→  label: string;
+   198→   198→  record: ProcessedCourseData;
+   199→   199→  prefix: string;
+   200→   200→}) {
+   201→   201→  const years = [2021, 2022, 2023, 2024, 2025];
+   202→   202→  const values = years.map(y => (record as unknown as Record<string, unknown>)[`${prefix}${y}`] as number | undefined);
+   203→   203→  const d = values[0] != null && values[4] != null ? values[4]! - values[0]! : 0;
+   204→   204→
+   205→   205→  let varHtml = '-';
+   206→   206→  if (values[0] != null && values[4] != null) {
+   207→   207→    if (d > 0) varHtml = `↑ +${d.toFixed(3).replace('.', ',')}`;
+   208→   208→    else if (d < 0) varHtml = `↓ ${d.toFixed(3).replace('.', ',')}`;
+   209→   209→    else varHtml = '= 0,000';
+   210→   210→  }
+   211→   211→
+   212→   212→  return (
+   213→   213→    <tr className="border-b border-gray-100">
+   214→   214→      <td className="p-3 text-left font-semibold">{label}</td>
+   215→   215→      {values.map((v, idx) => (
+   216→   216→        <td key={idx} className="p-2">
+   217→   217→          {v == null ? <span className="text-gray-400">-</span> : formatNum(v)}
+   218→   218→        </td>
+   219→   219→      ))}
+   220→   220→      <td className="p-2 text-right font-bold">{varHtml}</td>
+   221→   221→    </tr>
+   222→   222→  );
+   223→   223→}
+   224→   224→
+   225→   225→export function CourseModal({ codigo, open, onClose }: CourseModalProps) {
+   226→   226→  const allData = useMemo(() => processCourseData(), []);
+   227→   227→  const record = useMemo(
+   228→   228→    () => allData.find(x => x.codigo === codigo),
+   229→   229→    [allData, codigo]
+   230→   230→  );
+   231→   231→
+   232→   232→  if (!record) return null;
+   233→   233→
+   234→   234→  const ac = getCleanArea(record.area);
+   235→   235→  const b = nationalBenchmarks[ac] || ({} as Record<string, number>);
+   236→   236→  const cursoNome = getCourseName(record.area, record.codigo);
+   237→   237→  const dataAtual = new Date().toLocaleDateString('pt-BR');
+   238→   238→
+   239→   239→  const handlePrint = () => {
+   240→   240→    const printArea = document.getElementById('printArea');
+   241→   241→    if (printArea) {
+   242→   242→      printArea.style.display = 'block';
+   243→   243→      window.print();
+   244→   244→      setTimeout(() => {
+   245→   245→        printArea.style.display = 'none';
+   246→   246→      }, 1000);
+   247→   247→    }
+   248→   248→  };
+   249→   249→
+   250→   250→  return (
+   251→   251→    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+   252→   252→      <DialogContent
+   253→   253→        className="bg-white rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-slate-300 w-full max-w-[98vw] sm:max-w-[98vw] md:max-w-[98vw] h-[96vh] p-0 gap-0"
+   254→   254→        showCloseButton={false}
+   255→   255→      >
+   256→   256→        <DialogTitle className="sr-only">{cursoNome}</DialogTitle>
+   257→   257→        <DialogDescription className="sr-only">
+   258→   258→          Detalhes do curso {cursoNome}
+   259→   259→        </DialogDescription>
+   260→   260→
+   261→   261→        {/* Header */}
+   262→   262→        <div className="p-5 border-b border-gray-200 flex items-center justify-between bg-slate-100 z-10 shadow-sm">
+   263→   263→          <div>
+   264→   264→            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-blue-100 text-blue-800 text-xs font-black uppercase tracking-widest mb-2 shadow-sm border border-blue-200">
+   265→   265→              CÓD: {codigo}
+   266→   266→            </div>
+   267→   267→            <h2 className="text-3xl font-black text-gray-900 tracking-tight leading-tight">
+   268→   268→              {cursoNome}
+   269→   269→            </h2>
+   270→   270→            <p className="text-slate-700 font-black mt-1 uppercase text-sm tracking-widest">
+   271→   271→              Unidade Universitária: {record.municipio}
+   272→   272→            </p>
+   273→   273→          </div>
+   274→   274→          <div className="flex items-center gap-3">
+   275→   275→            <button
+   276→   276→              onClick={handlePrint}
+   277→   277→              className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-[#00338C] hover:bg-blue-50 hover:text-blue-800 border-2 border-blue-100 shadow-sm transition-transform hover:scale-105 shrink-0"
+   278→   278→              title="Gerar Relatório em PDF"
+   279→   279→            >
+   280→   280→              <Printer className="w-6 h-6" />
+   281→   281→            </button>
+   282→   282→            <button
+   283→   283→              onClick={onClose}
+   284→   284→              className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-red-600 hover:bg-red-50 hover:text-red-700 border-2 border-red-100 shadow-sm transition-transform hover:rotate-90 shrink-0"
+   285→   285→            >
+   286→   286→              <X className="w-8 h-8" />
+   287→   287→            </button>
+   288→   288→          </div>
+   289→   289→        </div>
+   290→   290→
+   291→   291→        {/* Content */}
+   292→   292→        <div className="flex-1 bg-slate-50 relative overflow-y-auto overflow-x-hidden p-8">
+   293→   293→          <h3 className="text-base font-black text-slate-950 uppercase tracking-widest mb-6">
+   294→   294→            Comparativo Institucional vs. Média Nacional
+   295→   295→          </h3>
+   296→   296→          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+   297→   297→            <ComparisonCard title="ENADE" v={record.en} n={b.enade} />
+   298→   298→            <ComparisonCard title="IDD" v={record.id} n={b.idd} />
+   299→   299→            <ComparisonCard title="CPC" v={record.cp} n={b.cpc} />
+   300→   300→          </div>
+   301→   301→          <h3 className="text-base font-black text-slate-950 uppercase tracking-widest mb-6 text-center mt-4">
+   302→   302→            Histórico Detalhado
+   303→   303→          </h3>
+   304→   304→          <div className="history-wrapper w-full overflow-x-auto overflow-y-visible rounded-[2rem] border border-slate-300 shadow-sm break-inside-avoid bg-white mb-8">
+   305→   305→            <table className="w-full text-sm text-center min-w-[800px]">
+   306→   306→              <thead>
+   307→   307→                <tr className="bg-slate-200 text-slate-950 text-sm font-black border-b border-slate-400 uppercase tracking-widest">
+   308→   308→                  <th className="text-left py-6 px-10">Indicador</th>
+   309→   309→                  <th>21</th>
+   310→   310→                  <th>22</th>
+   311→   311→                  <th>23</th>
+   312→   312→                  <th>24</th>
+   313→   313→                  <th>25</th>
+   314→   314→                  <th className="px-10">Var</th>
+   315→   315→                </tr>
+   316→   316→              </thead>
+   317→   317→              <tbody className="divide-y divide-slate-300 bg-white">
+   318→   318→                <HistoricalRow label="ENADE" record={record} prefix="enade" />
+   319→   319→                <HistoricalRow label="IDD" record={record} prefix="idd" />
+   320→   320→                <HistoricalRow label="CPC" record={record} prefix="cpc" />
+   321→   321→              </tbody>
+   322→   322→            </table>
+   323→   323→          </div>
+   324→   324→        </div>
+   325→   325→      </DialogContent>
+   326→   326→
+   327→   327→      {/* Print Area - Hidden on screen, visible on print */}
+   328→   328→      <div id="printArea" style={{ display: 'none' }}>
+   329→   329→        <div style={{ padding: '1.5cm', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif", color: '#333', lineHeight: 1.5 }}>
+   330→   330→          {/* Header */}
+   331→   331→          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+   332→   332→            <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+   333→   333→              <img
+   334→   334→                src="https://www.uems.br/anexos/imagens/conteudo/uems_imagens_2025-06-13_13-31-53.png"
+   335→   335→                alt="Logo UEMS"
+   336→   336→                style={{ height: '96px', margin: '0 auto' }}
+   337→   337→              />
+   338→   338→            </div>
+   339→   339→            <h1 style={{ color: '#003366', fontSize: '1.25rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 'tight', margin: 0 }}>
+   340→   340→              Divisão de Gestão do ENADE e Indicadores da Educação Superior
+   341→   341→            </h1>
+   342→   342→            <h2 style={{ fontSize: '1.125rem', fontWeight: 600, textTransform: 'uppercase', margin: '0.5rem 0' }}>
+   343→   343→              Relatório de Monitoramento de Curso - SINAES
+   344→   344→            </h2>
+   345→   345→            <p style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+   346→   346→              Data de Emissão: {dataAtual}
+   347→   347→            </p>
+   348→   348→          </div>
+   349→   349→
+   350→   350→          {/* 1. Identificação */}
+   351→   351→          <section style={{ marginBottom: '2rem' }}>
+   352→   352→            <h3 style={{ fontSize: '1rem', fontWeight: 'bold', borderBottom: '2px solid #f3f4f6', paddingBottom: '0.25rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: 'wide' }}>
+   353→   353→              1. Identificação do Curso
+   354→   354→            </h3>
+   355→   355→            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', fontSize: '0.875rem' }}>
+   356→   356→              <p><strong>Curso:</strong> {cursoNome}</p>
+   357→   357→              <p><strong>Unidade Universitária:</strong> {record.municipio}</p>
+   358→   358→              <p><strong>Código INEP:</strong> {codigo}</p>
+   359→   359→            </div>
+   360→   360→          </section>
+   361→   361→
+   362→   362→          {/* 2. Resultados Consolidados */}
+   363→   363→          <section style={{ marginBottom: '2rem' }}>
+   364→   364→            <h3 style={{ fontSize: '1rem', fontWeight: 'bold', borderBottom: '2px solid #f3f4f6', paddingBottom: '0.25rem', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: 'wide' }}>
+   365→   365→              2. Resultados Consolidados (Último Ciclo Avaliativo)
+   366→   366→            </h3>
+   367→   367→            <div style={{ overflowX: 'auto' }}>
+   368→   368→              <table style={{ width: '100%', textAlign: 'left', fontSize: '0.875rem', borderCollapse: 'collapse' }}>
+   369→   369→                <thead>
+   370→   370→                  <tr style={{ backgroundColor: '#003366', color: 'white', fontWeight: 600 }}>
+   371→   371→                    <th style={{ padding: '0.75rem', borderBottom: '1px solid #1a365d' }}>Indicador</th>
+   372→   372→                    <th style={{ padding: '0.75rem', textAlign: 'center', borderBottom: '1px solid #1a365d' }}>Nota Contínua</th>
+   373→   373→                    <th style={{ padding: '0.75rem', borderBottom: '1px solid #1a365d' }}>Conceito Final</th>
+   374→   374→                    <th style={{ padding: '0.75rem', textAlign: 'center', borderBottom: '1px solid #1a365d' }}>Média Nacional</th>
+   375→   375→                    <th style={{ padding: '0.75rem', borderBottom: '1px solid #1a365d', textAlign: 'right' }}>Situação vs. Nacional</th>
+   376→   376→                  </tr>
+   377→   377→                </thead>
+   378→   378→                <tbody>
+   379→   379→                  <tr style={{ borderBottom: '1px solid #f3f4f6', backgroundColor: '#f9fafb' }}>
+   380→   380→                    <td style={{ padding: '0.75rem', fontWeight: 600 }}>ENADE</td>
+   381→   381→                    <td style={{ padding: '0.75rem', textAlign: 'center', fontFamily: 'monospace' }}>{formatNum(record.en)}</td>
+   382→   382→                    <td style={{ padding: '0.75rem', fontWeight: 600 }}>{formatConcept(record.en)}</td>
+   383→   383→                    <td style={{ padding: '0.75rem', textAlign: 'center' }}>{formatNum(b.enade)}</td>
+   384→   384→                    <td style={{ padding: '0.75rem', textAlign: 'right' }}>{formatSit(record.en, b.enade)}</td>
+   385→   385→                  </tr>
+   386→   386→                  <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+   387→   387→                    <td style={{ padding: '0.75rem', fontWeight: 600 }}>IDD</td>
+   388→   388→                    <td style={{ padding: '0.75rem', textAlign: 'center', fontFamily: 'monospace' }}>{formatNum(record.id)}</td>
+   389→   389→                    <td style={{ padding: '0.75rem', fontWeight: 600 }}>{formatConcept(record.id)}</td>
+   390→   390→                    <td style={{ padding: '0.75rem', textAlign: 'center' }}>{formatNum(b.idd)}</td>
+   391→   391→                    <td style={{ padding: '0.75rem', textAlign: 'right' }}>{formatSit(record.id, b.idd)}</td>
+   392→   392→                  </tr>
+   393→   393→                  <tr style={{ borderBottom: '1px solid #f3f4f6', backgroundColor: '#f9fafb' }}>
+   394→   394→                    <td style={{ padding: '0.75rem', fontWeight: 600 }}>CPC</td>
+   395→   395→                    <td style={{ padding: '0.75rem', textAlign: 'center', fontFamily: 'monospace' }}>{formatNum(record.cp)}</td>
+   396→   396→                    <td style={{ padding: '0.75rem', fontWeight: 600 }}>{formatConcept(record.cp)}</td>
+   397→   397→                    <td style={{ padding: '0.75rem', textAlign: 'center' }}>{formatNum(b.cpc)}</td>
+   398→   398→                    <td style={{ padding: '0.75rem', textAlign: 'right' }}>{formatSit(record.cp, b.cpc)}</td>
+   399→   399→                  </tr>
+   400→   400→                </tbody>
+   401→   401→              </table>
+   402→   402→            </div>
+   403→   403→          </section>
+   404→   404→
+   405→   405→          {/* 3. Composição das Notas */}
+   406→   406→          <section style={{ marginBottom: '2rem', backgroundColor: '#f9fafb', padding: '1.25rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb' }}>
+   407→   407→            <h3 style={{ fontSize: '1rem', fontWeight: 'bold', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: 'wide' }}>
+   408→   408→              3. Entendendo a Composição das Notas
+   409→   409→            </h3>
+   410→   410→            <p style={{ fontSize: '0.875rem', marginBottom: '1rem', color: '#4b5563', fontStyle: 'italic', textAlign: 'justify' }}>
+   411→   411→              Para fins de diagnóstico e planejamento de ações da coordenação, detalhamos abaixo o que cada indicador mede e como o CPC é composto:
+   412→   412→            </p>
+   413→   413→            <ul style={{ fontSize: '0.875rem', listStyle: 'none', padding: 0 }}>
+   414→   414→              <li style={{ marginBottom: '1rem' }}><strong>ENADE:</strong> Avalia o rendimento dos concluintes em relação aos conteúdos previstos nas diretrizes curriculares.</li>
+   415→   415→              <li style={{ marginBottom: '1rem' }}>
+   416→   416→                <strong>IDD (Indicador de Diferença entre Desempenhos):</strong> Mede o &quot;valor agregado&quot; pelo curso ao aluno.
+   417→   417→                <div style={{ marginTop: '0.5rem', backgroundColor: '#eff6ff', padding: '0.75rem', borderLeft: '4px solid #1e40af', fontSize: '0.75rem', color: '#374151', borderRadius: '0 0.375rem 0.375rem 0' }}>
+   418→   418→                  <strong>Exemplo Prático:</strong> Imagine que um aluno ingressou na UEMS com uma nota baixa no ENEM (indicando base escolar frágil). Se, ao se formar, este mesmo aluno obtiver uma nota alta no ENADE, o IDD será elevado. Isso prova que a <strong>UEMS agregou conhecimento</strong> e transformou a trajetória acadêmica do estudante.
+   419→   419→                </div>
+   420→   420→              </li>
+   421→   421→              <li>
+   422→   422→                <strong>Composição do CPC:</strong>
+   423→   423→                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginTop: '0.5rem' }}>
+   424→   424→                  <span style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem' }}><strong>35%</strong> IDD</span>
+   425→   425→                  <span style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem' }}><strong>30%</strong> Corpo Docente</span>
+   426→   426→                  <span style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem' }}><strong>20%</strong> Nota ENADE</span>
+   427→   427→                  <span style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem' }}><strong>15%</strong> Questionário Estudante</span>
+   428→   428→                </div>
+   429→   429→              </li>
+   430→   430→            </ul>
+   431→   431→          </section>
+   432→   432→
+   433→   433→          {/* 4. Histórico Detalhado */}
+   434→   434→          <section style={{ marginBottom: '2rem', pageBreakAfter: 'always' }}>
+   435→   435→            <h3 style={{ fontSize: '1rem', fontWeight: 'bold', borderBottom: '2px solid #f3f4f6', paddingBottom: '0.25rem', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: 'wide' }}>
+   436→   436→              4. Histórico Detalhado e Parâmetros de Avaliação
+   437→   437→            </h3>
+   438→   438→            <div style={{ marginBottom: '2rem' }}>
+   439→   439→              <h4 style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#6b7280', marginBottom: '0.5rem', textTransform: 'uppercase', fontStyle: 'italic' }}>
+   440→   440→                Evolução das Notas (2021-2025)
+   441→   441→              </h4>
+   442→   442→              <div style={{ overflowX: 'auto' }}>
+   443→   443→                <table style={{ width: '100%', textAlign: 'center', fontSize: '0.875rem', borderCollapse: 'collapse', border: '1px solid #e5e7eb' }}>
+   444→   444→                  <thead>
+   445→   445→                    <tr style={{ backgroundColor: '#f3f4f6' }}>
+   446→   446→                      <th style={{ padding: '0.75rem', textAlign: 'left', borderBottom: '1px solid #d1d5db' }}>Indicador</th>
+   447→   447→                      <th style={{ padding: '0.5rem', borderBottom: '1px solid #d1d5db' }}>2021</th>
+   448→   448→                      <th style={{ padding: '0.5rem', borderBottom: '1px solid #d1d5db' }}>2022</th>
+   449→   449→                      <th style={{ padding: '0.5rem', borderBottom: '1px solid #d1d5db' }}>2023</th>
+   450→   450→                      <th style={{ padding: '0.5rem', borderBottom: '1px solid #d1d5db' }}>2024</th>
+   451→   451→                      <th style={{ padding: '0.5rem', borderBottom: '1px solid #d1d5db' }}>2025</th>
+   452→   452→                      <th style={{ padding: '0.5rem', textAlign: 'right', borderBottom: '1px solid #d1d5db' }}>Variação</th>
+   453→   453→                    </tr>
+   454→   454→                  </thead>
+   455→   455→                  <tbody>
+   456→   456→                    <PrintHistoricalRow label="ENADE" record={record} prefix="enade" />
+   457→   457→                    <tr style={{ borderBottom: '1px solid #f3f4f6', backgroundColor: '#f9fafb' }}>
+   458→   458→                      <td style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 600 }}>IDD</td>
+   459→   459→                      {[2021,2022,2023,2024,2025].map(y => {
+   460→   460→                        const v = (record as unknown as Record<string, unknown>)[`idd${y}`] as number | undefined;
+   461→   461→                        return <td key={y} style={{ padding: '0.5rem' }}>{v == null ? <span style={{ color: '#9ca3af' }}>-</span> : formatNum(v)}</td>;
+   462→   462→                      })}
+   463→   463→                      <td style={{ padding: '0.5rem', textAlign: 'right' }}>-</td>
+   464→   464→                    </tr>
+   465→   465→                    <tr style={{ borderBottom: '1px solid #f3f4f6' }}>
+   466→   466→                      <td style={{ padding: '0.75rem', textAlign: 'left', fontWeight: 600 }}>CPC</td>
+   467→   467→                      {[2021,2022,2023,2024,2025].map(y => {
+   468→   468→                        const v = (record as unknown as Record<string, unknown>)[`cpc${y}`] as number | undefined;
+   469→   469→                        return <td key={y} style={{ padding: '0.5rem' }}>{v == null ? <span style={{ color: '#9ca3af' }}>-</span> : formatNum(v)}</td>;
+   470→   470→                      })}
+   471→   471→                      <td style={{ padding: '0.5rem', textAlign: 'right' }}>-</td>
+   472→   472→                    </tr>
+   473→   473→                  </tbody>
+   474→   474→                </table>
+   475→   475→              </div>
+   476→   476→            </div>
+   477→   477→
+   478→   478→            {/* Legend */}
+   479→   479→            <div style={{ width: '100%', marginTop: '1rem' }}>
+   480→   480→              <h4 style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#6b7280', marginBottom: '0.5rem', textTransform: 'uppercase', fontStyle: 'italic' }}>
+   481→   481→                Legenda Oficial (INEP)
+   482→   482→              </h4>
+   483→   483→              <table style={{ width: '100%', fontSize: '0.75rem', borderCollapse: 'collapse', border: '1px solid #e5e7eb' }}>
+   484→   484→                <thead>
+   485→   485→                  <tr style={{ backgroundColor: '#f9fafb', color: '#4b5563' }}>
+   486→   486→                    <th style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb', textAlign: 'left' }}>Conceito</th>
+   487→   487→                    <th style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb', textAlign: 'right' }}>Faixa de Nota Contínua</th>
+   488→   488→                  </tr>
+   489→   489→                </thead>
+   490→   490→                <tbody style={{ color: '#374151' }}>
+   491→   491→                  <tr>
+   492→   492→                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb' }}><span style={{ width: '8px', height: '8px', display: 'inline-block', backgroundColor: '#dc2626', marginRight: '0.5rem', borderRadius: '50%' }}></span>1 - Não atende</td>
+   493→   493→                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb', textAlign: 'right' }}>0 a 0.944</td>
+   494→   494→                  </tr>
+   495→   495→                  <tr>
+   496→   496→                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb' }}><span style={{ width: '8px', height: '8px', display: 'inline-block', backgroundColor: '#f97316', marginRight: '0.5rem', borderRadius: '50%' }}></span>2 - Insuficiente</td>
+   497→   497→                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb', textAlign: 'right' }}>0.945 a 1.944</td>
+   498→   498→                  </tr>
+   499→   499→                  <tr style={{ backgroundColor: '#f0fdf4', fontWeight: 600, color: '#166534' }}>
+   500→   500→                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb' }}><span style={{ width: '8px', height: '8px', display: 'inline-block', backgroundColor: '#eab308', marginRight: '0.5rem', borderRadius: '50%' }}></span>3 - Suficiente</td>
+   501→   501→                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb', textAlign: 'right' }}>1.945 a 2.944</td>
+   502→   502→                  </tr>
+   503→   503→                  <tr>
+   504→   504→                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb' }}><span style={{ width: '8px', height: '8px', display: 'inline-block', backgroundColor: '#22c55e', marginRight: '0.5rem', borderRadius: '50%' }}></span>4 - Bom</td>
+   505→   505→                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb', textAlign: 'right' }}>2.945 a 3.944</td>
+   506→   506→                  </tr>
+   507→   507→                  <tr>
+   508→   508→                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb' }}><span style={{ width: '8px', height: '8px', display: 'inline-block', backgroundColor: '#15803d', marginRight: '0.5rem', borderRadius: '50%' }}></span>5 - Muito bom</td>
+   509→   509→                    <td style={{ padding: '0.5rem', borderBottom: '1px solid #e5e7eb', textAlign: 'right' }}>3.945 a 5.000</td>
+   510→   510→                  </tr>
+   511→   511→                </tbody>
+   512→   512→              </table>
+   513→   513→            </div>
+   514→   514→          </section>
+   515→   515→
+   516→   516→          {/* Footer */}
+   517→   517→          <footer style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb', textAlign: 'center' }}>
+   518→   518→            <p style={{ fontSize: '0.625rem', color: '#9ca3af', fontStyle: 'italic' }}>
+   519→   519→              Documento gerado automaticamente pelo Portal de Indicadores de Ensino (SINAES/UEMS) para fins estritamente institucionais.
+   520→   520→            </p>
+   521→   521→          </footer>
+   522→   522→        </div>
+   523→   523→      </div>
+   524→   524→    </Dialog>
+   525→   525→  );
+   526→   526→}
+   527→   527→

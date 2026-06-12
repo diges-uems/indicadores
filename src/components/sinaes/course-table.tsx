@@ -9,13 +9,14 @@ import { CreateBadge } from './badge-components';
 
 interface CourseTableProps {
   onCourseClick: (codigo: string) => void;
+  maxYear?: number;
 }
 
 type SortColumn = 'en' | 'id' | 'cp';
 type SortDirection = 'asc' | 'desc';
 
-export function CourseTable({ onCourseClick }: CourseTableProps) {
-  const allData = useMemo(() => processCourseData(), []);
+export function CourseTable({ onCourseClick, maxYear = 2025 }: CourseTableProps) {
+  const allData = useMemo(() => processCourseData(maxYear), [maxYear]);
 
   const [filterCourse, setFilterCourse] = useState('');
   const [filterGrau, setFilterGrau] = useState('');
@@ -83,14 +84,14 @@ export function CourseTable({ onCourseClick }: CourseTableProps) {
     <section className="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 mb-10 overflow-hidden">
       <div className="mb-6">
         <h3 className="text-2xl font-black text-[#00338C] tracking-tight uppercase">
-          Monitoramento de Cursos (2021-2025)
+          Monitoramento de Cursos (2021-2023)
         </h3>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
         <select
           value={filterCourse}
           onChange={(e) => setFilterCourse(e.target.value)}
-          className="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"
+          className="bg-slate-50 text-sm font-black text-slate-950 px-4 py-2.5 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"
         >
           <option value="">Curso (Todos)</option>
           {uniqueCourses.map(c => (
@@ -100,7 +101,7 @@ export function CourseTable({ onCourseClick }: CourseTableProps) {
         <select
           value={filterGrau}
           onChange={(e) => setFilterGrau(e.target.value)}
-          className="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"
+          className="bg-slate-50 text-sm font-black text-slate-950 px-4 py-2.5 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"
         >
           <option value="">Grau (Todos)</option>
           <option value="Licenciatura">Licenciatura</option>
@@ -110,7 +111,7 @@ export function CourseTable({ onCourseClick }: CourseTableProps) {
         <select
           value={filterCampus}
           onChange={(e) => setFilterCampus(e.target.value)}
-          className="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"
+          className="bg-slate-50 text-sm font-black text-slate-950 px-4 py-2.5 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"
         >
           <option value="">Unidade Universitária (Todas)</option>
           {uniqueCampi.map(m => (
@@ -120,7 +121,7 @@ export function CourseTable({ onCourseClick }: CourseTableProps) {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value)}
-          className="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"
+          className="bg-slate-50 text-sm font-black text-slate-950 px-4 py-2.5 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"
         >
           <option value="">Status (Todos)</option>
           <option value="BOM">Bom / Muito bom (4-5)</option>
@@ -135,36 +136,36 @@ export function CourseTable({ onCourseClick }: CourseTableProps) {
         </p>
         <button
           onClick={resetFilters}
-          className="px-5 py-2 text-sm font-black text-white bg-slate-950 hover:bg-black rounded-lg transition-colors uppercase shadow-sm"
+          className="px-4 py-2 text-xs font-black text-white bg-slate-950 hover:bg-black rounded-lg transition-colors uppercase shadow-sm"
         >
           Limpar Filtros
         </button>
       </div>
       <div className="w-full overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
-        <table className="w-full text-base text-left">
+        <table className="w-full text-sm text-left">
           <thead>
-            <tr className="bg-slate-50 text-slate-950 border-b border-gray-200 uppercase font-black text-sm tracking-widest">
-              <th className="py-5 px-6 w-[35%]">Curso</th>
-              <th className="py-5 px-6 text-center w-[15%]">Unid. Universitária</th>
+            <tr className="bg-slate-50 text-slate-950 border-b border-gray-200 uppercase font-black text-xs tracking-widest">
+              <th className="py-4 px-5 w-[35%]">Curso</th>
+              <th className="py-4 px-5 text-center w-[15%]">Unid. Universitária</th>
               <th
-                className="text-center py-5 px-3 cursor-pointer hover:text-blue-900"
+                className="text-center py-4 px-2 cursor-pointer hover:text-blue-900"
                 onClick={() => handleSort('en')}
               >
                 ENADE {getSortIndicator('en')}
               </th>
               <th
-                className="text-center py-5 px-3 cursor-pointer hover:text-blue-900"
+                className="text-center py-4 px-2 cursor-pointer hover:text-blue-900"
                 onClick={() => handleSort('id')}
               >
                 IDD {getSortIndicator('id')}
               </th>
               <th
-                className="text-center py-5 px-3 cursor-pointer hover:text-blue-900"
+                className="text-center py-4 px-2 cursor-pointer hover:text-blue-900"
                 onClick={() => handleSort('cp')}
               >
                 CPC {getSortIndicator('cp')}
               </th>
-              <th className="text-center py-5 px-6 w-[14%]">Status</th>
+              <th className="text-center py-4 px-5 w-[14%]">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
@@ -182,31 +183,31 @@ export function CourseTable({ onCourseClick }: CourseTableProps) {
                   className="hover:bg-blue-50 transition-colors cursor-pointer border-b border-slate-100"
                   onClick={() => onCourseClick(r.codigo)}
                 >
-                  <td className="py-4 px-6">
+                  <td className="py-3 px-5">
                     <div className="flex flex-col">
-                      <span className="font-black text-blue-950">
+                      <span className="font-black text-blue-950 text-sm">
                         {r.area}{gs}
                       </span>
-                      <span className="text-xs font-bold uppercase text-slate-500 tracking-wider mt-1">
+                      <span className="text-[10px] font-bold uppercase text-slate-500 tracking-wider mt-0.5">
                         CÓD: {r.codigo}
                       </span>
                     </div>
                   </td>
-                  <td className="py-4 px-6 text-center font-black uppercase text-sm">
+                  <td className="py-3 px-5 text-center font-black uppercase text-xs">
                     {r.municipio}
                   </td>
-                  <td className="py-4 px-2 text-center">
+                  <td className="py-3 px-1 text-center">
                     <CreateBadge v={r.en} nV={b.enade} />
                   </td>
-                  <td className="py-4 px-2 text-center">
+                  <td className="py-3 px-1 text-center">
                     <CreateBadge v={r.id} nV={b.idd} />
                   </td>
-                  <td className="py-4 px-2 text-center">
+                  <td className="py-3 px-1 text-center">
                     <CreateBadge v={r.cp} nV={b.cpc} />
                   </td>
-                  <td className="py-4 px-6 text-center">
+                  <td className="py-3 px-5 text-center">
                     <span
-                      className={`px-3 py-1.5 ${st.cl} ${statusTextColor} rounded-lg text-xs font-black uppercase tracking-wider inline-block`}
+                      className={`px-2.5 py-1 ${st.cl} ${statusTextColor} rounded-lg text-[10px] font-black uppercase tracking-wider inline-block`}
                     >
                       {st.label}
                     </span>

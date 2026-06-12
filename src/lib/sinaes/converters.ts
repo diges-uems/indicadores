@@ -1,5 +1,6 @@
-export function getLatestValue(r: Record<string, unknown>, prefix: string): number | null {
+export function getLatestValue(r: Record<string, unknown>, prefix: string, maxYear: number = 2025): number | null {
   for (const y of [2025, 2024, 2023, 2022, 2021]) {
+    if (y > maxYear) continue;
     const key = `${prefix}${y}`;
     const val = r[key];
     if (val != null) return val as number;

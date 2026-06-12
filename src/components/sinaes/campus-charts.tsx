@@ -5,15 +5,20 @@ import { processCourseData } from '@/lib/sinaes/use-course-data';
 import { convertToRange } from '@/lib/sinaes/converters';
 import { Maximize2 } from 'lucide-react';
 
+interface CampusChartsProps {
+  onExpand?: () => void;
+  maxYear?: number;
+}
+
 interface CampusDataItem {
   m: string;
   v: number;
   c: number;
 }
 
-export function CampusCharts({ onExpand }: { onExpand?: () => void }) {
+export function CampusCharts({ onExpand, maxYear = 2025 }: CampusChartsProps) {
   const campusData = useMemo(() => {
-    const allData = processCourseData();
+    const allData = processCourseData(maxYear);
     const map: Record<string, { s: number; c: number }> = {};
 
     allData.forEach(r => {
@@ -34,45 +39,45 @@ export function CampusCharts({ onExpand }: { onExpand?: () => void }) {
         c: map[m].c,
       }))
       .sort((a, b) => b.v - a.v);
-  }, []);
+  }, [maxYear]);
 
   return (
-    <section className="bg-white rounded-[2.5rem] p-10 bento-shadow border border-gray-100 h-full relative group transition-transform duration-300">
+    <section className="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 h-full relative group transition-transform duration-300">
       {onExpand && (
         <button
           onClick={onExpand}
-          className="btn-zoom absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-blue-600 text-slate-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-md border border-slate-200 z-10"
+          className="btn-zoom absolute top-6 right-6 w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-blue-600 text-slate-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-md border border-slate-200 z-10"
           title="Ampliar Secção"
         >
-          <Maximize2 className="w-6 h-6" />
+          <Maximize2 className="w-5 h-5" />
         </button>
       )}
 
-      <div className="mb-8 pr-12">
-        <h3 className="text-2xl font-black text-slate-950 tracking-tight uppercase">
+      <div className="mb-6 pr-10">
+        <h3 className="text-xl font-black text-slate-950 tracking-tight uppercase">
           Qualidade por Unidade Universitária
         </h3>
-        <p className="text-base text-slate-950 font-black mt-1 uppercase">
+        <p className="text-sm text-slate-950 font-black mt-1 uppercase">
           Média Institucional (1 a 5)
         </p>
       </div>
-      <div className="space-y-4 pr-4">
+      <div className="space-y-3 pr-4">
         {campusData.map((item) => (
-          <div key={item.m} className="flex items-center gap-4 break-inside-avoid">
-            <div className="w-40 text-right shrink-0">
-              <p className="text-sm font-black uppercase leading-none truncate" title={item.m}>
+          <div key={item.m} className="flex items-center gap-3 break-inside-avoid">
+            <div className="w-32 text-right shrink-0">
+              <p className="text-xs font-black uppercase leading-none truncate" title={item.m}>
                 {item.m}
               </p>
-              <p className="text-xs font-bold text-slate-500 uppercase mt-1">
+              <p className="text-[10px] font-bold text-slate-500 uppercase mt-0.5">
                 {item.c} cursos
               </p>
             </div>
-            <div className="flex-1 h-8 bg-slate-100 rounded-full overflow-hidden relative">
+            <div className="flex-1 h-7 bg-slate-100 rounded-full overflow-hidden relative">
               <div
                 className="h-full bg-gradient-to-r from-blue-700 to-cyan-500 flex items-center justify-end pr-3 bar-animate"
                 style={{ width: `${(item.v / 5) * 100}%` }}
               >
-                <span className="text-sm text-white font-black leading-none">
+                <span className="text-xs text-white font-black leading-none">
                   {item.v.toFixed(2)}
                 </span>
               </div>

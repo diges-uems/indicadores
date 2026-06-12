@@ -8,12 +8,15 @@ import { EnadePieChart } from '@/components/sinaes/enade-pie-chart';
 import { CampusCharts } from '@/components/sinaes/campus-charts';
 import { StateComparison } from '@/components/sinaes/state-comparison';
 import { CourseTable } from '@/components/sinaes/course-table';
+import { Enade2025Tab } from '@/components/sinaes/enade-2025-tab';
 import { ForecastTab } from '@/components/sinaes/forecast-tab';
 import { CourseModal } from '@/components/sinaes/course-modal';
 import { SectionModal } from '@/components/sinaes/section-modal';
 
+type TabType = 'results' | 'enade2025' | 'forecast';
+
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'results' | 'forecast'>('results');
+  const [activeTab, setActiveTab] = useState<TabType>('results');
   const [courseModalCodigo, setCourseModalCodigo] = useState<string | null>(null);
   const [courseModalOpen, setCourseModalOpen] = useState(false);
   const [sectionModalOpen, setSectionModalOpen] = useState(false);
@@ -48,21 +51,22 @@ export default function Home() {
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
         <main className="max-w-7xl mx-auto px-4 sm:px-8 py-2">
-          {/* Results Tab */}
+          {/* Results Tab (up to 2023) */}
           {activeTab === 'results' && (
-            <div className="animate-fade-in space-y-6">
-              <TopCards />
-              <EnadePieChart />
+            <div className="animate-fade-in space-y-5">
+              <TopCards maxYear={2023} />
+              <EnadePieChart maxYear={2023} />
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                 <CampusCharts
+                  maxYear={2023}
                   onExpand={() =>
                     openSectionModal(
                       'Qualidade por Unidade Universitária',
                       'Média Institucional (1 a 5)',
                       'CAMPUS',
                       true,
-                      <CampusCharts />
+                      <CampusCharts maxYear={2023} />
                     )
                   }
                 />
@@ -79,9 +83,12 @@ export default function Home() {
                 />
               </div>
 
-              <CourseTable onCourseClick={handleCourseClick} />
+              <CourseTable maxYear={2023} onCourseClick={handleCourseClick} />
             </div>
           )}
+
+          {/* ENADE 2025 Tab */}
+          {activeTab === 'enade2025' && <Enade2025Tab />}
 
           {/* Forecast Tab */}
           {activeTab === 'forecast' && <ForecastTab />}

@@ -1,8 +1,8 @@
 'use client';
 
 interface TabNavigationProps {
-  activeTab: 'results' | 'forecast';
-  onTabChange: (tab: 'results' | 'forecast') => void;
+  activeTab: 'results' | 'enade2025' | 'forecast';
+  onTabChange: (tab: 'results' | 'enade2025' | 'forecast') => void;
 }
 
 export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
@@ -13,7 +13,13 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
           className={`tab-btn ${activeTab === 'results' ? 'active' : ''} pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold`}
           onClick={() => onTabChange('results')}
         >
-          Resultados Oficiais (2021-2025)
+          Resultados Oficiais (2021-2023)
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'enade2025' ? 'active' : ''} pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold`}
+          onClick={() => onTabChange('enade2025')}
+        >
+          ENADE 2025
         </button>
         <button
           className={`tab-btn ${activeTab === 'forecast' ? 'active' : ''} pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold`}
