@@ -211,6 +211,12 @@
 }
 
 /* Print styles */
+@media screen {
+  #printArea {
+    display: none !important;
+  }
+}
+
 @media print {
   @page {
     margin: 0;
@@ -225,13 +231,29 @@
   }
 
   .fixed-bg-texture,
-  #main-wrapper {
+  #main-wrapper,
+  [role="dialog"],
+  [data-radix-overlay],
+  .fixed inset-0 {
     display: none !important;
+  }
+
+  #printArea {
+    display: block !important;
   }
 
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+
+  .page-break {
+    page-break-after: always;
+  }
+
+  table, tr, td, th {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
 

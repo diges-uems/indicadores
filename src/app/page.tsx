@@ -50,7 +50,7 @@ export default function Home() {
         <main className="max-w-7xl mx-auto px-4 sm:px-8 py-2">
           {/* Results Tab */}
           {activeTab === 'results' && (
-            <div className="animate-fade-in space-y-10">
+            <div className="animate-fade-in space-y-6">
               <TopCards />
               <EnadePieChart />
 
