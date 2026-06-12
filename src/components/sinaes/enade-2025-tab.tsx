@@ -33,19 +33,13 @@ export function Enade2025Tab() {
     []
   );
 
-  const { chartData, counts, total, totalInscritos, totalParticipantes, totalAcimaBasico } = useMemo(() => {
+  const { chartData, counts, total } = useMemo(() => {
     const c: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     let t = 0;
-    let insc = 0;
-    let part = 0;
-    let acima = 0;
 
     enade2025Data.forEach(d => {
       c[d.conceito]++;
       t++;
-      insc += d.concluintesInscritos;
-      part += d.concluintesParticipantes;
-      acima += d.concluinteAcimaBasico;
     });
 
     const data: ChartDataItem[] = [1, 2, 3, 4, 5].map(i => ({
@@ -55,7 +49,7 @@ export function Enade2025Tab() {
       concept: i,
     }));
 
-    return { chartData: data, counts: c, total: t, totalInscritos: insc, totalParticipantes: part, totalAcimaBasico: acima };
+    return { chartData: data, counts: c, total: t };
   }, []);
 
   const filteredData = useMemo(() => {
@@ -83,7 +77,7 @@ export function Enade2025Tab() {
       setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortCol(col);
-      setSortDir(col === 'conceito' || col === 'percentual' ? 'asc' : 'asc');
+      setSortDir('asc');
     }
   };
 
@@ -107,7 +101,6 @@ export function Enade2025Tab() {
   const insuficienteCount = counts[1] + counts[2];
   const bomPct = total > 0 ? Math.round((bomCount / total) * 100) : 0;
   const insuficientePct = total > 0 ? Math.round((insuficienteCount / total) * 100) : 0;
-  const globalPercentual = totalParticipantes > 0 ? (totalAcimaBasico / totalParticipantes) : 0;
 
   const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: ChartDataItem }> }) => {
     if (active && payload && payload.length) {
@@ -127,7 +120,7 @@ export function Enade2025Tab() {
   return (
     <div className="animate-fade-in space-y-6">
       {/* Summary Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Total courses */}
         <div className="bg-white rounded-[2rem] p-6 bento-shadow border border-gray-100 flex flex-col justify-between">
           <div className="flex justify-between items-start mb-3">
@@ -151,32 +144,13 @@ export function Enade2025Tab() {
           </div>
         </div>
 
-        {/* Concluintes */}
-        <div className="bg-white rounded-[2rem] p-6 bento-shadow border border-gray-100 flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm">
-              <Users className="w-5 h-5" />
-            </div>
-            <span className="bg-blue-600 text-white text-lg font-black px-3 py-1 rounded-full shadow-lg shadow-blue-100">
-              {totalParticipantes}
-            </span>
-          </div>
-          <p className="text-xs font-black text-slate-950 uppercase tracking-widest mb-1">
-            Concluintes Participantes
-          </p>
-          <div className="flex items-baseline gap-2">
-            <p className="text-5xl font-black text-slate-950 tracking-tighter leading-none">
-              {totalInscritos}
-            </p>
-            <p className="text-sm font-semibold text-slate-500 uppercase">inscritos</p>
-          </div>
-        </div>
-
         {/* Bom/Muito Bom */}
         <div className="bg-white rounded-[2rem] p-6 bento-shadow border border-gray-100 flex flex-col justify-between">
           <div className="flex justify-between items-start mb-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm">
-              <UserCheck className="w-5 h-5" />
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
             <span className="bg-emerald-600 text-white text-lg font-black px-3 py-1 rounded-full shadow-lg shadow-green-100">
               {bomPct}%
@@ -215,32 +189,6 @@ export function Enade2025Tab() {
               {insuficienteCount}
             </p>
             <p className="text-sm font-semibold text-slate-500 uppercase">cursos</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Performance Overview Bar */}
-      <section className="bg-white rounded-[2rem] p-6 bento-shadow border border-gray-100">
-        <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="flex-1 w-full">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-black text-slate-950 uppercase tracking-widest">
-                Desempenho Global — Acima do Padrão 1
-              </p>
-              <p className="text-2xl font-black text-[#00338C]">
-                {(globalPercentual * 100).toFixed(1)}%
-              </p>
-            </div>
-            <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-blue-700 to-cyan-500 rounded-full transition-all duration-700"
-                style={{ width: `${globalPercentual * 100}%` }}
-              />
-            </div>
-            <div className="flex justify-between mt-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-              <span>{totalAcimaBasico} concluintes acima do básico</span>
-              <span>{totalParticipantes} participantes de {totalInscritos} inscritos</span>
-            </div>
           </div>
         </div>
       </section>
