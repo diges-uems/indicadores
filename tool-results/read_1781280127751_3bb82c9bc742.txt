@@ -1,0 +1,1231 @@
+     1→     1→<!doctype html>
+     2→     2→<html lang="pt-BR" class="h-full no-scrollbar">
+     3→     3→<head>
+     4→     4→  <meta charset="UTF-8">
+     5→     5→  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     6→     6→  <title>Portal de Indicadores de Ensino (SINAES/UEMS)</title>
+     7→     7→  <meta name="theme-color" content="#00338C">
+     8→     8→  <link rel="preconnect" href="https://fonts.googleapis.com">
+     9→     9→  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    10→    10→  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    11→    11→  <script src="https://cdn.tailwindcss.com"></script>
+    12→    12→  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    13→    13→  <script>
+    14→    14→    tailwind.config = { 
+    15→    15→      theme: { 
+    16→    16→        extend: { 
+    17→    17→          fontFamily: { sans: ['Inter', 'sans-serif'] }, 
+    18→    18→          colors: { 
+    19→    19→            'sinaes-dark': '#0B1428', 
+    20→    20→            'sinaes-card': '#162038', 
+    21→    21→            'sinaes-blue': '#214187', 
+    22→    22→            'sinaes-yellow': '#EAB308' 
+    23→    23→          } 
+    24→    24→        } 
+    25→    25→      } 
+    26→    26→    }
+    27→    27→  </script>
+    28→    28→  <style>
+    29→    29→    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+    30→    30→    html, body { height: 100%; background-color: #f8fafc; overflow-x: hidden; scroll-behavior: smooth; }
+    31→    31→    
+    32→    32→    .no-scrollbar::-webkit-scrollbar { display: none; }
+    33→    33→    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    34→    34→
+    35→    35→    .fixed-bg-texture { position: fixed; inset: 0; z-index: -1; background: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 16px 16px; opacity: 0.5; pointer-events: none; }
+    36→    36→    .bento-shadow { box-shadow: 0 24px 60px -10px rgba(0, 34, 85, 0.08); }
+    37→    37→    
+    38→    38→    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    39→    39→    .animate-fade-in { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+    40→    40→    .bar-animate { animation: growBar 1s ease-out forwards; transform-origin: left; }
+    41→    41→    @keyframes growBar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    42→    42→    
+    43→    43→    .tab-btn { position: relative; transition: all 0.3s ease; cursor: pointer; }
+    44→    44→    .tab-btn::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 3px; background-color: transparent; transition: all 0.3s ease; border-radius: 3px 3px 0 0; }
+    45→    45→    .tab-btn.active { color: #00338C; font-weight: 800; }
+    46→    46→    .tab-btn.active::after { background-color: #00338C; }
+    47→    47→
+    48→    48→    /* ========================================================
+    49→    49→       MODAIS MAXIMIZADOS (TELA)
+    50→    50→       ======================================================== */
+    51→    51→    #genericModal > div, #courseModal > div {
+    52→    52→        width: 98vw !important;
+    53→    53→        max-width: 1800px !important;
+    54→    54→        height: 96vh !important;
+    55→    55→        max-height: 96vh !important;
+    56→    56→    }
+    57→    57→    
+    58→    58→    #genericModal > div > div:first-child, #courseModal > div > div:first-child {
+    59→    59→        padding: 1.5rem 3rem !important;
+    60→    60→    }
+    61→    61→
+    62→    62→    #genericModalContent, #modalContent {
+    63→    63→        display: block !important; 
+    64→    64→        overflow-y: auto !important; 
+    65→    65→        overflow-x: hidden !important;
+    66→    66→        padding: 2rem 3rem !important;
+    67→    67→        height: auto !important;
+    68→    68→    }
+    69→    69→    
+    70→    70→    #genericModalContent *, #modalContent * { flex-shrink: 0 !important; }
+    71→    71→    #genericModalContent .h-full, #modalContent .h-full,
+    72→    72→    #genericModalContent .min-h-full, #modalContent .min-h-full { height: auto !important; min-height: min-content !important; }
+    73→    73→
+    74→    74→    #modalContent .text-slate-500, #genericModalContent .text-slate-500,
+    75→    75→    #modalContent .text-slate-400, #genericModalContent .text-slate-400 { color: #0f172a !important; font-weight: 900 !important; }
+    76→    76→    #modalContent .text-slate-900, #genericModalContent .text-slate-900,
+    77→    77→    #modalContent .text-slate-950, #genericModalContent .text-slate-950 { color: #000000 !important; }
+    78→    78→
+    79→    79→    #genericModalContent .min-w-[40px], #modalContent .min-w-[40px] { min-width: 60px !important; font-size: 1.8rem !important; padding: 0.8rem !important; }
+    80→    80→    #genericModalContent .min-w-[64px], #modalContent .min-w-[64px] { min-width: 100px !important; font-size: 1.8rem !important; padding: 0.8rem !important; }
+    81→    81→    #genericModalContent .min-w-[32px], #modalContent .min-w-[32px] { min-width: 56px !important; font-size: 1.6rem !important; padding: 0.6rem !important; }
+    82→    82→    #genericModalContent .min-w-[50px], #modalContent .min-w-[50px] { min-width: 90px !important; font-size: 1.6rem !important; padding: 0.6rem !important; }
+    83→    83→
+    84→    84→    /* Modal Curso */
+    85→    85→    #modalContent { display: flex !important; flex-direction: column; gap: 2rem; }
+    86→    86→    #modalContent h3 { font-size: 1.8rem !important; margin-bottom: 1.5rem !important; }
+    87→    87→    #modalContent .text-[9px] { font-size: 1.2rem !important; line-height: 1.4rem !important; }
+    88→    88→    #modalContent .text-[10px] { font-size: 1.4rem !important; line-height: 1.6rem !important; }
+    89→    89→    #modalContent .text-xs { font-size: 1.6rem !important; line-height: 1.8rem !important; }
+    90→    90→    #modalContent .text-sm { font-size: 1.8rem !important; line-height: 2.1rem !important; }
+    91→    91→    #modalContent .text-4xl { font-size: 4.5rem !important; line-height: 1 !important; }
+    92→    92→    #modalContent .mb-12 { margin-bottom: 2rem !important; }
+    93→    93→    #modalContent .p-6 { padding: 1.5rem 2rem !important; }
+    94→    94→    
+    95→    95→    #modalContent .history-wrapper { overflow-x: auto !important; overflow-y: visible !important; height: auto !important; display: block !important; margin-bottom: 2rem !important; }
+    96→    96→    #modalContent table { height: auto !important; margin: 0 !important; width: 100% !important; min-width: 800px !important; }
+    97→    97→    #modalContent th, #modalContent td { padding: 1.5rem !important; font-size: 1.6rem !important; }
+    98→    98→    #modalContent .w-10.h-10 { width: 5.5rem !important; height: 5.5rem !important; font-size: 3rem !important; }
+    99→    99→
+   100→   100→    /* Modais Genéricos */
+   101→   101→    #content-guia { display: flex !important; flex-direction: column !important; gap: 4rem !important; } 
+   102→   102→    #genericModalContent .mb-10 { margin-bottom: 1.5rem !important; }
+   103→   103→    #genericModalContent .mb-8 { margin-bottom: 1rem !important; }
+   104→   104→    #genericModalContent .gap-y-12 { row-gap: 3.5rem !important; } 
+   105→   105→    #genericModalContent .space-y-5 > * + * { margin-top: 2.5rem !important; }
+   106→   106→    #genericModalContent li span.w-10 { width: 8rem !important; font-size: 2.4rem !important; }
+   107→   107→    #genericModalContent .w-10.h-10 { width: 6rem !important; height: 6rem !important; font-size: 2.5rem !important; }
+   108→   108→    #genericModalContent h3.text-xl { font-size: 2.4rem !important; margin-bottom: 1.5rem !important; line-height: 1.3 !important; }
+   109→   109→    #genericModalContent p.text-base { font-size: 1.8rem !important; margin-bottom: 1.5rem !important; line-height: 1.5 !important; }
+   110→   110→    #genericModalContent li { font-size: 1.8rem !important; margin-bottom: 1rem !important; line-height: 1.4 !important; }
+   111→   111→    #genericModalContent table { height: auto; width: 100%; min-width: 800px !important; } 
+   112→   112→    #genericModalContent th, #genericModalContent td { padding: 1.7rem !important; font-size: 1.8rem !important; }
+   113→   113→    
+   114→   114→    #genericModalContent #content-campus > div { display: flex !important; flex-direction: column !important; align-items: flex-start !important; width: 100% !important; margin-bottom: 3.5rem !important; gap: 1rem !important; }
+   115→   115→    #genericModalContent #content-campus .w-40 { width: 100% !important; text-align: left !important; } 
+   116→   116→    #genericModalContent #content-campus .truncate { white-space: normal !important; overflow: visible !important; }
+   117→   117→    #genericModalContent .text-sm { font-size: 1.8rem !important; line-height: 2.2rem !important; }
+   118→   118→    #genericModalContent .text-xs { font-size: 1.4rem !important; line-height: 1.8rem !important; }
+   119→   119→    #genericModalContent p.text-xs { margin-top: 0.25rem !important; }
+   120→   120→    #genericModalContent .h-8 { height: 5rem !important; border-radius: 9999px !important; width: 100% !important; }
+   121→   121→    #genericModalContent .bg-gradient-to-r { border-radius: 9999px !important; height: 100% !important; }
+   122→   122→    #genericModalContent .bg-gradient-to-r span { font-size: 2.2rem !important; line-height: 1 !important; display: flex; align-items: center; padding-right: 1.5rem; height: 100% !important; }
+   123→   123→    #genericModalContent .space-y-4 > * + * { margin-top: 2rem !important; }
+   124→   124→
+   125→   125→    .modal-white-override { background-color: #ffffff !important; }
+   126→   126→    .modal-white-override * { color: #0f172a !important; border-color: #cbd5e1 !important; }
+   127→   127→    .modal-white-override .text-gray-400 { color: #475569 !important; font-weight: 700 !important; }
+   128→   128→    .modal-white-override .text-gray-500 { color: #64748b !important; }
+   129→   129→    .modal-white-override .bg-\[\#1C2438\], .modal-white-override .bg-\[\#162038\] { background-color: #f8fafc !important; border: 1px solid #e2e8f0 !important; box-shadow: none !important; }
+   130→   130→    .modal-white-override .bg-\[\#214187\]\/20 { background-color: #eff6ff !important; border-color: #bfdbfe !important; }
+   131→   131→    .modal-white-override .bg-\[\#214187\] { background-color: #e2e8f0 !important; color: #0f172a !important; }
+   132→   132→    .modal-white-override .text-yellow-500 { color: #b45309 !important; }
+   133→   133→    .modal-white-override .text-purple-400 { color: #6d28d9 !important; }
+   134→   134→    .modal-white-override .text-blue-400, .modal-white-override .text-blue-300 { color: #00338C !important; }
+   135→   135→    .modal-white-override .text-green-400 { color: #15803d !important; }
+   136→   136→    .modal-white-override svg { stroke: #0f172a !important; }
+   137→   137→
+   138→   138→    /* ========================================================
+   139→   139→       MODO IMPRESSÃO (RELATÓRIO PDF INSTITUCIONAL)
+   140→   140→       ======================================================== */
+   141→   141→    /* Classes de estilo específicas do documento de impressão */
+   142→   142→    .uems-blue { color: #003366; }
+   143→   143→    .bg-uems-blue { background-color: #003366; }
+   144→   144→    .table-zebra tr:nth-child(even) { background-color: #f9fafb; }
+   145→   145→    
+   146→   146→    @media screen {
+   147→   147→        #printArea { display: none !important; }
+   148→   148→    }
+   149→   149→       
+   150→   150→    @media print {
+   151→   151→        @page { margin: 0; size: A4 portrait; }
+   152→   152→        
+   153→   153→        /* Limpa o body para o papel branco */
+   154→   154→        body { background-color: #ffffff !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
+   155→   155→        
+   156→   156→        /* Esconde tudo o que for da tela do sistema */
+   157→   157→        .fixed-bg-texture, #main-wrapper, #genericModal, #courseModal, .no-print { 
+   158→   158→            display: none !important; 
+   159→   159→        }
+   160→   160→
+   161→   161→        /* Mostra e formata o Espelho de Impressão A4 */
+   162→   162→        #printArea { 
+   163→   163→            display: block !important; 
+   164→   164→            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+   165→   165→            color: #333;
+   166→   166→            line-height: 1.5;
+   167→   167→            width: 100%;
+   168→   168→            margin: 0;
+   169→   169→            padding: 1.5cm; /* Margem interna recriada para não colar na borda do papel */
+   170→   170→            box-sizing: border-box;
+   171→   171→        }
+   172→   172→
+   173→   173→        /* Utilitários de quebra de página */
+   174→   174→        .page-break { page-break-after: always; }
+   175→   175→        .break-inside-avoid, table, tr, td, th {
+   176→   176→            page-break-inside: avoid !important;
+   177→   177→            break-inside: avoid !important;
+   178→   178→        }
+   179→   179→
+   180→   180→        /* Garante fidelidade das cores na impressão PDF */
+   181→   181→        * {
+   182→   182→            -webkit-print-color-adjust: exact !important;
+   183→   183→            print-color-adjust: exact !important;
+   184→   184→        }
+   185→   185→    }
+   186→   186→  </style>
+   187→   187→</head>
+   188→   188→<body class="h-full overflow-x-hidden no-scrollbar relative font-sans antialiased text-slate-950 bg-slate-50 transition-colors duration-300">
+   189→   189→  <div class="fixed-bg-texture"></div>
+   190→   190→  
+   191→   191→  <div id="main-wrapper" class="min-h-full w-full transition-all duration-500">
+   192→   192→   
+   193→   193→   <header class="relative w-full max-w-7xl mx-auto mt-6 px-4 sm:px-8 mb-6 animate-fade-in">
+   194→   194→    <div class="relative w-full min-h-[350px] rounded-[2rem] overflow-hidden shadow-2xl shadow-blue-900/10">
+   195→   195→     <img src="https://www.uems.br/anexos/imagens/conteudo/uems_imagens_2023-09-22_13-02-19.png" alt="Fachada principal UEMS" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.background='#00338C';">
+   196→   196→     <div class="absolute inset-0 bg-gradient-to-r from-[#002255]/95 via-[#00338c]/60 to-transparent"></div>
+   197→   197→     <div class="absolute inset-0 flex flex-col md:flex-row items-start md:items-end justify-between p-10 md:p-14 z-10 pb-10">
+   198→   198→      <div>
+   199→   199→       <h1 class="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight max-w-2xl">
+   200→   200→         Portal de Indicadores de Ensino <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-blue-100 to-white">SINAES</span>
+   201→   201→       </h1>
+   202→   202→       <p class="text-blue-100 text-lg md:text-xl mt-4 font-medium max-w-xl">Monitoramento Estratégico Institucional para Gestão de Qualidade.</p>
+   203→   203→      </div>
+   204→   204→     </div>
+   205→   205→    </div>
+   206→   206→   </header>
+   207→   207→
+   208→   208→   <div class="max-w-7xl mx-auto px-4 sm:px-8 mb-8 animate-fade-in" style="animation-delay: 0.1s;">
+   209→   209→     <div class="flex gap-8 border-b border-gray-200 overflow-x-auto no-scrollbar whitespace-nowrap">
+   210→   210→       <button id="btn-tab-results" class="tab-btn active pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold" onclick="switchTab('results')">Resultados Oficiais (2021-2025)</button>
+   211→   211→       <button id="btn-tab-forecast" class="tab-btn pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold" onclick="switchTab('forecast')">Previsão ENADE (2026-2028)</button>
+   212→   212→     </div>
+   213→   213→   </div>
+   214→   214→
+   215→   215→   <main class="max-w-7xl mx-auto px-4 sm:px-8 py-2">
+   216→   216→    
+   217→   217→    <!-- ABA 1: RESULTADOS OFICIAIS -->
+   218→   218→    <div id="view-results" class="block animate-fade-in space-y-10">
+   219→   219→        
+   220→   220→        <!-- TOP CARDS -->
+   221→   221→        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+   222→   222→         <!-- Média Institucional -->
+   223→   223→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 flex flex-col justify-between overflow-hidden">
+   224→   224→          <div>
+   225→   225→           <div class="flex justify-between items-start mb-6">
+   226→   226→            <div class="w-12 h-12 rounded-[1rem] bg-[#F0F5FF] text-[#2563EB] flex items-center justify-center shadow-sm">
+   227→   227→                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+   228→   228→            </div>
+   229→   229→            <span class="bg-[#F0F5FF] text-[#2563EB] text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-blue-50">Média Oficial UEMS</span>
+   230→   230→           </div>
+   231→   231→           <p class="text-sm font-black text-slate-950 uppercase tracking-widest mb-4">Índice Geral de Cursos (IGC)</p>
+   232→   232→           <div id="instTopBadge"></div>
+   233→   233→          </div>
+   234→   234→          <div class="mt-8 grid grid-cols-3 gap-2">
+   235→   235→           <div class="bg-slate-50 rounded-2xl py-3 px-1 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1.5"><p class="text-xs text-slate-950 font-black uppercase tracking-widest mb-0.5">ENADE</p><div id="instEnadeBadge" class="w-full flex justify-center"></div></div>
+   236→   236→           <div class="bg-slate-50 rounded-2xl py-3 px-1 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1.5"><p class="text-xs text-slate-950 font-black uppercase tracking-widest mb-0.5">IDD</p><div id="instIddBadge" class="w-full flex justify-center"></div></div>
+   237→   237→           <div class="bg-slate-50 rounded-2xl py-3 px-1 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1.5"><p class="text-xs text-slate-950 font-black uppercase tracking-widest mb-0.5">CPC</p><div id="instCpcBadge" class="w-full flex justify-center"></div></div>
+   238→   238→          </div>
+   239→   239→         </div>
+   240→   240→         
+   241→   241→         <!-- CONCEITOS 4 E 5 -->
+   242→   242→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 flex flex-col justify-between overflow-hidden">
+   243→   243→          <div>
+   244→   244→           <div class="flex justify-between items-start mb-4">
+   245→   245→            <div class="w-12 h-12 rounded-[1rem] bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg></div>
+   246→   246→            <span id="highlightPercentage" class="bg-[#16A34A] text-white text-lg font-black px-4 py-1.5 rounded-full shadow-lg shadow-green-100">0%</span>
+   247→   247→           </div>
+   248→   248→           <p class="text-sm font-black text-slate-950 uppercase tracking-widest mb-1 leading-tight">CONCEITOS 4 E 5 CPC</p>
+   249→   249→           <div class="flex items-baseline gap-2"><p id="highlightCount" class="text-7xl font-black text-slate-950 tracking-tighter leading-none">0</p><p class="text-base font-semibold text-slate-950 uppercase">cursos</p></div>
+   250→   250→          </div>
+   251→   251→          <div class="mt-8 pt-5 border-t border-gray-100">
+   252→   252→            <p class="text-xs text-slate-950 font-black uppercase mb-3 tracking-widest">Cursos na faixa</p>
+   253→   253→            <div class="flex flex-wrap gap-2" id="highlightBadges"></div>
+   254→   254→          </div>
+   255→   255→         </div>
+   256→   256→
+   257→   257→         <!-- CONCEITOS 1 E 2 -->
+   258→   258→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 flex flex-col justify-between overflow-hidden">
+   259→   259→          <div>
+   260→   260→           <div class="flex justify-between items-start mb-4">
+   261→   261→            <div class="w-12 h-12 rounded-[1rem] bg-red-50 text-red-600 flex items-center justify-center shadow-inner relative"><span class="absolute top-0 right-0 flex h-3 w-3 -mt-1 -mr-1"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span></span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></div>
+   262→   262→            <span id="criticalPercentage" class="bg-[#DC2626] text-white text-lg font-black px-4 py-1.5 rounded-full shadow-lg shadow-red-100">0%</span>
+   263→   263→           </div>
+   264→   264→           <p class="text-sm font-black text-slate-950 uppercase tracking-widest mb-1 leading-tight">CONCEITOS 1 E 2 CPC</p>
+   265→   265→           <div class="flex items-baseline gap-2"><p id="criticalCount" class="text-7xl font-black text-slate-950 tracking-tighter leading-none">0</p><p class="text-base font-semibold text-slate-950 uppercase">cursos</p></div>
+   266→   266→          </div>
+   267→   267→          <div class="mt-8 pt-5 border-t border-gray-100">
+   268→   268→            <p class="text-xs text-red-700 font-black uppercase mb-3 tracking-widest">Cursos na faixa</p>
+   269→   269→            <div class="flex flex-wrap gap-2" id="criticalBadges"></div>
+   270→   270→          </div>
+   271→   271→         </div>
+   272→   272→        </section>
+   273→   273→
+   274→   274→        <!-- GRÁFICO DE PIZZA ENADE -->
+   275→   275→        <section class="bg-white rounded-[2.5rem] p-10 bento-shadow border border-gray-100 mb-10 flex flex-col md:flex-row items-center gap-10 overflow-hidden">
+   276→   276→          <div class="w-full md:w-5/12 flex flex-col justify-center">
+   277→   277→            <h2 class="text-2xl font-black text-[#00338C] uppercase tracking-tight mb-2">Desempenho ENADE</h2>
+   278→   278→            <p class="text-sm text-slate-500 font-medium mb-8">Distribuição percentual dos conceitos oficiais obtidos pelos cursos na prova do ENADE.</p>
+   279→   279→            <div id="enadePieLegend" class="space-y-3 w-full">
+   280→   280→              <!-- Legenda preenchida via JS -->
+   281→   281→            </div>
+   282→   282→          </div>
+   283→   283→          <div class="w-full md:w-7/12 flex justify-center items-center">
+   284→   284→            <div class="relative w-72 h-72 lg:w-[26rem] lg:h-[26rem] filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.12)] transition-transform duration-500 hover:scale-105">
+   285→   285→              <canvas id="enadePieChart"></canvas>
+   286→   286→            </div>
+   287→   287→          </div>
+   288→   288→        </section>
+   289→   289→
+   290→   290→        <!-- GUIA RÁPIDO E FAIXA DE CONCEITO -->
+   291→   291→        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10 items-stretch">
+   292→   292→          <section id="section-guia" class="lg:col-span-8 bg-[#0B1428] rounded-[2rem] p-10 bento-shadow text-white border border-gray-800 flex flex-col justify-between relative group transition-transform duration-300">
+   293→   293→            <button onclick="openSectionModal('content-guia', 'Entendendo os Indicadores', 'Guia Rápido SINAES', 'INFORMAÇÃO', true)" class="btn-zoom absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl bg-blue-500/20 hover:bg-blue-600 text-blue-300 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-lg border border-blue-500/30 z-10 no-print" title="Ampliar Secção">
+   294→   294→                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+   295→   295→            </button>
+   296→   296→
+   297→   297→            <div class="flex items-center gap-3 mb-10 pr-12">
+   298→   298→              <div class="w-10 h-10 rounded-full bg-blue-900/40 flex items-center justify-center border border-blue-700/50 text-blue-300 font-bold italic text-xl shadow-inner shrink-0">i</div>
+   299→   299→              <h2 class="text-2xl font-black text-white uppercase tracking-tight">Guia Rápido: Entendendo os Indicadores</h2>
+   300→   300→            </div>
+   301→   301→            
+   302→   302→            <div id="content-guia" class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12 h-full">
+   303→   303→              <div class="flex flex-col h-full">
+   304→   304→                <h3 class="text-xl font-bold text-white mb-4 uppercase tracking-wide">CPC <span class="text-gray-500 font-medium text-xs">(Conceito Preliminar de Curso)</span></h3>
+   305→   305→                <p class="text-base text-gray-400 mb-8 leading-relaxed">Nota final composta por 4 insumos principais:</p>
+   306→   306→                <ul class="space-y-5 mb-10 text-base flex-1">
+   307→   307→                  <li class="flex items-center gap-4"><span class="font-black text-yellow-500 w-10 shrink-0 text-lg">35%</span> <span><strong class="text-white">IDD</strong> <span class="text-gray-400 text-xs">(Valor agregado) • Fonte: ENADE</span></span></li>
+   308→   308→                  <li class="flex items-start gap-4"><span class="font-black text-purple-400 w-10 shrink-0 text-lg">30%</span> <span><strong class="text-white">Corpo Docente</strong> <span class="text-gray-400 text-xs">(Formação) • Fonte: Censo da Educação Superior</span></span></li>
+   309→   309→                  <li class="flex items-center gap-4"><span class="font-black text-blue-400 w-10 shrink-0 text-lg">20%</span> <span><strong class="text-white">Nota ENADE</strong> <span class="text-gray-400 text-xs">(Prova) • Fonte: ENADE</span></span></li>
+   310→   310→                  <li class="flex items-center gap-4"><span class="font-black text-green-400 w-10 shrink-0 text-lg">15%</span> <span><strong class="text-white">Questionário do Estudante</strong> <span class="text-gray-400 text-xs">• Fonte: ENADE</span></span></li>
+   311→   311→                </ul>
+   312→   312→                <div class="bg-[#1C2438] border border-gray-700 rounded-2xl p-5 flex items-start gap-4 shadow-xl mt-auto">
+   313→   313→                  <div class="mt-1 w-10 h-10 rounded-xl bg-yellow-600/20 text-yellow-500 flex items-center justify-center border border-yellow-600/30 shrink-0 shadow-inner text-xs">⚡</div>
+   314→   314→                  <div>
+   315→   315→                    <h4 class="text-yellow-500 font-bold text-sm uppercase tracking-widest mb-1">O Peso da Prova</h4>
+   316→   316→                    <p class="text-sm text-gray-400 leading-relaxed">Os 3 insumos atrelados ao ENADE representam <strong class="text-white">70% do CPC</strong>.</p>
+   317→   317→                  </div>
+   318→   318→                </div>
+   319→   319→              </div>
+   320→   320→
+   321→   321→              <div class="flex flex-col h-full">
+   322→   322→                <h3 class="text-xl font-bold text-white mb-4 uppercase tracking-wide">IDD <span class="text-gray-500 font-medium text-xs">(Valor Agregado)</span></h3>
+   323→   323→                <p class="text-base text-gray-400 mb-8 leading-relaxed">Mede o quanto a universidade agregou de conhecimento ao aluno:</p>
+   324→   324→                <div class="bg-[#162038] border border-gray-700/50 rounded-2xl p-8 mb-8 flex items-center justify-between shadow-2xl relative">
+   325→   325→                  <div class="text-center flex-1">
+   326→   326→                    <p class="text-sm font-bold text-blue-300 uppercase tracking-widest mb-3">Entrada</p>
+   327→   327→                    <div class="bg-[#214187] text-white font-black py-3 px-4 rounded-xl shadow-lg border border-blue-400/20 text-sm uppercase">ENEM</div>
+   328→   328→                  </div>
+   329→   329→                  <div class="px-6 text-blue-400"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg></div>
+   330→   330→                  <div class="text-center flex-1">
+   331→   331→                    <p class="text-sm font-bold text-blue-300 uppercase tracking-widest mb-3">Saída</p>
+   332→   332→                    <div class="bg-[#214187] text-white font-black py-3 px-4 rounded-xl shadow-lg border border-blue-400/20 text-sm uppercase">ENADE</div>
+   333→   333→                  </div>
+   334→   334→                </div>
+   335→   335→                <div class="bg-[#214187]/20 border border-[#214187]/50 rounded-2xl p-6 shadow-inner mt-auto">
+   336→   336→                  <p class="text-base text-blue-100 leading-relaxed italic">"Se a nota final (ENADE) supera a expectativa gerada pela nota de entrada (ENEM), o curso ganha um IDD alto, puxando positivamente o CPC para cima."</p>
+   337→   337→                </div>
+   338→   338→              </div>
+   339→   339→            </div>
+   340→   340→          </section>
+   341→   341→
+   342→   342→          <section class="lg:col-span-4 bg-white rounded-[2rem] p-10 bento-shadow border border-gray-100 flex flex-col justify-center overflow-hidden">
+   343→   343→            <h2 class="text-xs font-black text-slate-950 uppercase tracking-[0.2em] mb-10 text-center">Faixa de Conceito (NC)</h2>
+   344→   344→            <div class="space-y-3.5 flex flex-col items-stretch">
+   345→   345→              <div class="flex items-center gap-4 bg-[#FEF2F2] border border-[#FEE2E2] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#DC2626] text-white font-black text-xl flex items-center justify-center shadow-md">1</div><div><p class="font-bold text-[#991B1B] text-base uppercase leading-none">Não atende</p><p class="text-sm font-black text-slate-950 mt-1.5">0,000 a 0,944</p></div></div>
+   346→   346→              <div class="flex items-center gap-4 bg-[#FEF2F2] border border-[#FEE2E2] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#F87171] text-white font-black text-xl flex items-center justify-center shadow-md">2</div><div><p class="font-bold text-[#991B1B] text-base uppercase leading-none">Insuficiente</p><p class="text-sm font-black text-slate-950 mt-1.5">0,945 a 1,944</p></div></div>
+   347→   347→              <div class="flex items-center gap-4 bg-[#FEFCE8] border border-[#FEF08A] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#EAB308] text-slate-950 font-black text-xl flex items-center justify-center shadow-md">3</div><div><p class="font-bold text-[#B45309] text-base uppercase leading-none">Suficiente</p><p class="text-sm font-black text-slate-950 mt-1.5">1,945 a 2,944</p></div></div>
+   348→   348→              <div class="flex items-center gap-4 bg-[#F0FDF4] border border-[#BBF7D0] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#4ADE80] text-slate-950 font-black text-xl flex items-center justify-center shadow-md">4</div><div><p class="font-bold text-[#15803D] text-base uppercase leading-none">Bom</p><p class="text-sm font-black text-slate-950 mt-1.5">2,945 a 3,944</p></div></div>
+   349→   349→              <div class="flex items-center gap-4 bg-[#F0FDF4] border border-[#BBF7D0] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#16A34A] text-white font-black text-xl flex items-center justify-center shadow-md">5</div><div><p class="font-bold text-[#14532D] text-base uppercase leading-none">Muito bom</p><p class="text-sm font-black text-slate-950 mt-1.5">3,945 a 5,000</p></div></div>
+   350→   350→            </div>
+   351→   351→          </section>
+   352→   352→        </div>
+   353→   353→
+   354→   354→        <!-- ANALYTICS SECTION -->
+   355→   355→        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10 items-stretch">
+   356→   356→          <section id="section-campus" class="bg-white rounded-[2.5rem] p-10 bento-shadow border border-gray-100 h-full relative group transition-transform duration-300">
+   357→   357→           <button onclick="openSectionModal('content-campus', 'Qualidade por Unidade Universitária', 'Média Institucional de Notas (1 a 5)', 'GRÁFICO', false)" class="btn-zoom absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-blue-600 text-slate-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-md border border-slate-200 z-10 no-print" title="Ampliar Secção">
+   358→   358→                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+   359→   359→           </button>
+   360→   360→
+   361→   361→           <div class="mb-8 pr-12">
+   362→   362→             <h3 class="text-2xl font-black text-slate-950 tracking-tight uppercase">Qualidade por Unidade Universitária</h3>
+   363→   363→             <p class="text-base text-slate-950 font-black mt-1 uppercase">Média Institucional (1 a 5)</p>
+   364→   364→           </div>
+   365→   365→           <div class="space-y-4 pr-4" id="content-campus"></div>
+   366→   366→          </section>
+   367→   367→
+   368→   368→          <section id="section-state" class="bg-white rounded-[2.5rem] p-10 bento-shadow border border-gray-100 h-full overflow-hidden relative group transition-transform duration-300">
+   369→   369→            <button onclick="openSectionModal('content-state', 'Comparativo Estadual', 'IES Públicas do Mato Grosso do Sul', 'TABELA', false)" class="btn-zoom absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-blue-600 text-slate-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-md border border-slate-200 z-10 no-print" title="Ampliar Secção">
+   370→   370→                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+   371→   371→            </button>
+   372→   372→
+   373→   373→            <div class="mb-8 pr-12">
+   374→   374→              <h3 class="text-2xl font-black text-slate-950 tracking-tight uppercase">Comparativo Estadual</h3>
+   375→   375→              <p class="text-base text-slate-950 font-black mt-1 uppercase">IES Públicas de MS</p>
+   376→   376→            </div>
+   377→   377→            <div id="content-state" class="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 shadow-sm bg-white">
+   378→   378→              <table class="w-full text-sm text-left">
+   379→   379→                <thead>
+   380→   380→                  <tr class="bg-slate-50 border-b border-gray-100 uppercase font-black text-sm text-slate-950 tracking-wider">
+   381→   381→                    <th class="py-5 px-6">IES</th>
+   382→   382→                    <th class="py-5 px-2 text-center">ENADE</th>
+   383→   383→                    <th class="py-5 px-2 text-center">IDD</th>
+   384→   384→                    <th class="py-5 px-2 text-center">CPC</th>
+   385→   385→                    <th class="py-5 px-6 text-center">IGC</th>
+   386→   386→                  </tr>
+   387→   387→                </thead>
+   388→   388→                <tbody id="stateComparisonBody" class="divide-y divide-slate-50">
+   389→   389→                </tbody>
+   390→   390→              </table>
+   391→   391→            </div>
+   392→   392→          </section>
+   393→   393→        </div>
+   394→   394→
+   395→   395→        <!-- TABELA MONITORAMENTO -->
+   396→   396→        <section class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 mb-10 overflow-hidden">
+   397→   397→         <div class="mb-6"><h3 class="text-2xl font-black text-[#00338C] tracking-tight uppercase">Monitoramento de Cursos (2021-2025)</h3></div>
+   398→   398→         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+   399→   399→          <select id="filterCourse" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Curso (Todos)</option></select> 
+   400→   400→          <select id="filterGrau" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Grau (Todos)</option><option value="Licenciatura">Licenciatura</option><option value="Bacharelado">Bacharelado</option><option value="Tecnológico">Tecnológico</option></select> 
+   401→   401→          <select id="filterCampus" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Unidade Universitária (Todas)</option></select> 
+   402→   402→          <select id="filterStatus" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Status (Todos)</option><option value="BOM">Bom / Muito bom (4-5)</option><option value="SUFICIENTE">Suficiente (3)</option><option value="INSUFICIENTE">Não atende / Insuficiente (1-2)</option></select>
+   403→   403→         </div>
+   404→   404→         <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+   405→   405→          <p class="text-sm font-black text-slate-950 uppercase tracking-widest">Exibindo <span id="recordCount" class="text-[#00338C]">0</span> de <span id="totalRecords">0</span></p>
+   406→   406→          <button id="resetFiltersBtn" class="px-5 py-2 text-sm font-black text-white bg-slate-950 hover:bg-black rounded-lg transition-colors uppercase shadow-sm">Limpar Filtros</button>
+   407→   407→         </div>
+   408→   408→         <div class="w-full overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
+   409→   409→          <table class="w-full text-base text-left">
+   410→   410→           <thead>
+   411→   411→            <tr class="bg-slate-50 text-slate-950 border-b border-gray-200 uppercase font-black text-sm tracking-widest">
+   412→   412→             <th class="py-5 px-6 w-[35%]">Curso</th>
+   413→   413→             <th class="py-5 px-6 text-center w-[15%]">Unid. Universitária</th>
+   414→   414→             <th class="text-center py-5 px-3 cursor-pointer hover:text-blue-900" onclick="window.handleSort('en')">ENADE <span id="sort-en" class="text-slate-500 text-xs">↕</span></th>
+   415→   415→             <th class="text-center py-5 px-3 cursor-pointer hover:text-blue-900" onclick="window.handleSort('id')">IDD <span id="sort-id" class="text-slate-500 text-xs">↕</span></th>
+   416→   416→             <th class="text-center py-5 px-3 cursor-pointer hover:text-blue-900" onclick="window.handleSort('cp')">CPC <span id="sort-cp" class="text-blue-900 text-sm font-black">↓</span></th>
+   417→   417→             <th class="text-center py-5 px-6 w-[14%]">Status</th>
+   418→   418→            </tr>
+   419→   419→           </thead>
+   420→   420→           <tbody id="allCoursesTableBody" class="divide-y divide-gray-50"></tbody>
+   421→   421→          </table>
+   422→   422→         </div>
+   423→   423→        </section>
+   424→   424→    </div>
+   425→   425→
+   426→   426→    <!-- ABA 2: PREVISÃO -->
+   427→   427→    <div id="view-forecast" class="hidden animate-fade-in space-y-10 no-scrollbar">
+   428→   428→        <div class="mb-8">
+   429→   429→            <h2 class="text-3xl font-black text-[#00338C] tracking-tight uppercase">Calendário de Avaliação (2026 - 2028)</h2>
+   430→   430→            <p class="text-slate-950 mt-2 font-black uppercase tracking-wide italic text-base">Ciclo Trienal INEP/CineBrasil</p>
+   431→   431→        </div>
+   432→   432→        
+   433→   433→        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+   434→   434→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-purple-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-purple-100 text-purple-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Contínuo</span><p class="text-3xl font-black text-purple-900 mt-4">Anual</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Licenciaturas e Medicina</p></div><div class="mt-8 pt-5 border-t border-purple-100 flex items-baseline gap-2"><p class="text-5xl font-black text-slate-950 tracking-tighter" id="countAnual">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+   435→   435→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-blue-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-blue-100 text-blue-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Ano II</span><p class="text-3xl font-black text-[#00338C] mt-4">2026</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Naturais, Tecnologia da Informação e Comunicação e Engenharias</p></div><div class="mt-8 pt-5 border-t border-blue-100 flex items-baseline gap-2"><p class="text-5xl font-black text-slate-950 tracking-tighter" id="count2026">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+   436→   436→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-emerald-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-emerald-100 text-emerald-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Ano III</span><p class="text-3xl font-black text-emerald-700 mt-4">2027</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Agrárias, Saúde e Serviços</p></div><div class="mt-8 pt-5 border-t border-emerald-100 flex items-baseline gap-2"><p class="text-4xl font-black text-slate-950 tracking-tighter" id="count2027">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+   437→   437→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-amber-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-amber-100 text-amber-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Ano I</span><p class="text-3xl font-black text-amber-800 mt-4">2028</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Sociais Aplicadas e Humanas</p></div><div class="mt-8 pt-5 border-t border-amber-100 flex items-baseline gap-2"><p class="text-5xl font-black text-slate-950 tracking-tighter" id="count2028">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+   438→   438→        </section>
+   439→   439→
+   440→   440→        <section class="bg-white rounded-[2.5rem] p-12 bento-shadow border border-gray-100 mb-10 overflow-hidden">
+   441→   441→         <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+   442→   442→          <h3 class="text-xl font-black text-slate-950 tracking-tight uppercase">Lista de Cursos Previstos</h3>
+   443→   443→          <select id="filterForecastYear" class="bg-slate-50 text-base font-black text-slate-950 px-5 py-3 rounded-xl border border-gray-200 outline-none uppercase cursor-pointer shadow-sm w-full md:w-auto" onchange="renderForecastTable()"><option value="">Todos os Anos</option><option value="Anual">Anual</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option></select>
+   444→   444→         </div>
+   445→   445→         <div class="w-full overflow-hidden rounded-3xl border border-gray-100 shadow-sm bg-white">
+   446→   446→          <table class="w-full text-base text-left">
+   447→   447→           <thead>
+   448→   448→             <tr class="bg-slate-50 text-slate-950 border-b border-gray-200 uppercase font-black text-sm tracking-widest">
+   449→   449→               <th class="py-5 px-8">Curso</th>
+   450→   450→               <th class="py-5 px-6">Unidade Universitária</th>
+   451→   451→               <th class="py-5 px-6">Área (CineBrasil)</th>
+   452→   452→               <th class="text-center py-5 px-8">Ano Previsto</th>
+   453→   453→             </tr>
+   454→   454→           </thead>
+   455→   455→           <tbody id="forecastTableBody" class="divide-y divide-gray-50"></tbody>
+   456→   456→          </table>
+   457→   457→         </div>
+   458→   458→        </section>
+   459→   459→    </div>
+   460→   460→   </main>
+   461→   461→
+   462→   462→   <footer class="py-12 max-w-7xl mx-auto px-4 border-t border-gray-200 text-center">
+   463→   463→    <span class="text-base text-[#00338C] font-black uppercase tracking-widest">© 2026 UEMS</span>
+   464→   464→   </footer>
+   465→   465→  </div>
+   466→   466→
+   467→   467→  <!-- MODAL GENÉRICO (POPUP DAS SEÇÕES - AMPLIAÇÃO) -->
+   468→   468→  <div id="genericModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center z-50 p-2 md:p-4 transition-opacity duration-300">
+   469→   469→   <div class="bg-white rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-slate-300 w-full max-w-5xl">
+   470→   470→    <div class="p-5 border-b border-gray-200 flex items-center justify-between bg-slate-100 z-10 shadow-sm">
+   471→   471→     <div>
+   472→   472→      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-blue-100 text-blue-800 text-xs font-black uppercase tracking-widest mb-2 shadow-sm border border-blue-200" id="genericModalBadge">DETALHE</div>
+   473→   473→      <h2 id="genericModalTitle" class="text-3xl font-black text-gray-900 tracking-tight leading-tight">Título da Seção</h2>
+   474→   474→      <p id="genericModalSubtitle" class="text-slate-700 font-black mt-1 uppercase text-sm tracking-widest">Subtítulo</p>
+   475→   475→     </div>
+   476→   476→     <button onclick="closeGenericModal()" class="w-14 h-14 bg-white rounded-full flex items-center justify-center text-red-600 hover:bg-red-50 hover:text-red-700 border-2 border-red-100 shadow-sm transition-transform hover:rotate-90 shrink-0"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg></button>
+   477→   477→    </div>
+   478→   478→    <!-- O conteúdo clonado entra aqui, com SCROLL ativo -->
+   479→   479→    <div class="flex-1 bg-slate-50 relative" id="genericModalContent"></div>
+   480→   480→   </div>
+   481→   481→  </div>
+   482→   482→
+   483→   483→  <!-- MODAL DETALHE DO CURSO (TELA DE VISUALIZAÇÃO - SISTEMA) -->
+   484→   484→  <div id="courseModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center z-50 p-2 md:p-4 transition-opacity duration-300">
+   485→   485→   <div class="bg-white rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-slate-300 w-full max-w-4xl">
+   486→   486→    <div class="p-5 border-b border-gray-200 flex items-center justify-between bg-slate-100 z-10 shadow-sm no-print">
+   487→   487→     <div>
+   488→   488→      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-blue-100 text-blue-800 text-xs font-black uppercase tracking-widest mb-2 shadow-sm border border-blue-200" id="modalCourseCodeBadge">CÓD: 000000</div>
+   489→   489→      <h2 id="modalCourseTitle" class="text-3xl font-black text-gray-900 tracking-tight leading-tight">Nome do Curso</h2>
+   490→   490→      <p id="modalCourseSubtitle" class="text-slate-700 font-black mt-1 uppercase text-sm tracking-widest"></p>
+   491→   491→     </div>
+   492→   492→     <div class="flex items-center gap-3 no-print">
+   493→   493→      <button onclick="window.print()" class="w-14 h-14 bg-white rounded-full flex items-center justify-center text-[#00338C] hover:bg-blue-50 hover:text-blue-800 border-2 border-blue-100 shadow-sm transition-transform hover:scale-105 shrink-0" title="Gerar Relatório em PDF"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg></button>
+   494→   494→      <button onclick="closeModal()" class="w-14 h-14 bg-white rounded-full flex items-center justify-center text-red-600 hover:bg-red-50 hover:text-red-700 border-2 border-red-100 shadow-sm transition-transform hover:rotate-90 shrink-0"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg></button>
+   495→   495→     </div>
+   496→   496→    </div>
+   497→   497→    <!-- O conteúdo visual do Modal em Tela -->
+   498→   498→    <div class="flex-1 bg-slate-50 relative" id="modalContent"></div>
+   499→   499→   </div>
+   500→   500→  </div>
+   501→   501→
+   502→   502→  <!-- ÁREA DE IMPRESSÃO A4 (ESCONDIDA NA TELA, MOSTRADA NO PDF) -->
+   503→   503→  <div id="printArea" style="display: none;"></div>
+   504→   504→
+   505→   505→  <script>
+   506→   506→    // --- LÓGICA DO MODAL DE AMPLIAÇÃO DAS SEÇÕES (POPUP) ---
+   507→   507→    function openSectionModal(contentId, title, subtitle, badgeText, isDarkThemeSource) {
+   508→   508→        document.getElementById('genericModalTitle').textContent = title;
+   509→   509→        document.getElementById('genericModalSubtitle').textContent = subtitle;
+   510→   510→        document.getElementById('genericModalBadge').textContent = badgeText;
+   511→   511→
+   512→   512→        const originalContent = document.getElementById(contentId);
+   513→   513→        const clone = originalContent.cloneNode(true);
+   514→   514→        
+   515→   515→        const container = document.getElementById('genericModalContent');
+   516→   516→        container.innerHTML = '';
+   517→   517→        
+   518→   518→        const wrapper = document.createElement('div');
+   519→   519→        if (isDarkThemeSource) {
+   520→   520→            wrapper.className = 'w-full min-h-full modal-white-override bg-white rounded-b-[2rem] p-8';
+   521→   521→        } else {
+   522→   522→            wrapper.className = 'w-full min-h-full bg-white rounded-b-[2rem] p-8';
+   523→   523→        }
+   524→   524→        
+   525→   525→        wrapper.appendChild(clone);
+   526→   526→        container.appendChild(wrapper);
+   527→   527→        
+   528→   528→        const m = document.getElementById('genericModal'); 
+   529→   529→        m.classList.remove('hidden'); 
+   530→   530→        setTimeout(()=>m.style.opacity='1', 10);
+   531→   531→    }
+   532→   532→
+   533→   533→    function closeGenericModal() {
+   534→   534→        const m = document.getElementById('genericModal'); 
+   535→   535→        m.style.opacity='0'; 
+   536→   536→        setTimeout(()=>m.classList.add('hidden'), 300);
+   537→   537→        setTimeout(()=>document.getElementById('genericModalContent').innerHTML = '', 300);
+   538→   538→    }
+   539→   539→
+   540→   540→    // --- DADOS DO SISTEMA ---
+   541→   541→    const grauMap = {'45711':'Licenciatura','113050':'Licenciatura','68265':'Licenciatura','45713':'Licenciatura','45715':'Licenciatura','50933':'Licenciatura','123588':'Licenciatura','105780':'Licenciatura','105928':'Licenciatura','89022':'Licenciatura','150105':'Licenciatura','89018':'Licenciatura','89024':'Licenciatura','89029':'Licenciatura','150106':'Licenciatura','45701':'Licenciatura','45703':'Licenciatura','68313':'Licenciatura','113052':'Licenciatura','113054':'Licenciatura','113056':'Licenciatura','113058':'Licenciatura','50935':'Licenciatura','51044':'Licenciatura','95706':'Bacharelado','1190630':'Bacharelado','1190631':'Bacharelado','1265863':'Bacharelado','1313326':'Bacharelado','68321':'Bacharelado','150102':'Licenciatura','17762':'Bacharelado','17766':'Bacharelado','68315':'Bacharelado','68319':'Bacharelado','95708':'Bacharelado','113045':'Bacharelado','113047':'Bacharelado','123562':'Bacharelado','1117933':'Bacharelado','1313341':'Bacharelado','17735':'Bacharelado','45598':'Bacharelado','51042':'Bacharelado','45605':'Bacharelado','5000476':'Bacharelado','5000475':'Tecnológico','1314210':'Bacharelado','17768':'Bacharelado','150104':'Licenciatura'};
+   542→   542→    const nationalBenchmarks = { 'Administração':{enade:2.63,cpc:3.23,idd:2.83},'Agronomia':{enade:2.81,cpc:3.50,idd:3.04},'Ciência da Computação':{enade:2.20,cpc:3.35,idd:3.09},'Ciências Biológicas':{enade:2.57,cpc:3.51,idd:2.98},'Ciências Contábeis':{enade:2.69,cpc:3.27,idd:3.03},'Ciências Econômicas':{enade:2.28,cpc:3.29,idd:2.80},'Ciências Sociais':{enade:2.68,cpc:3.52,idd:2.97},'Direito':{enade:2.69,cpc:3.27,idd:3.07},'Enfermagem':{enade:2.63,cpc:3.38,idd:3.09},'Engenharia Ambiental e Sanitária':{enade:2.77,cpc:3.50,idd:3.04},'Engenharia de Alimentos':{enade:2.40,cpc:3.35,idd:2.88},'Engenharia Florestal':{enade:2.66,cpc:3.66,idd:3.08},'Física':{enade:2.40,cpc:3.40,idd:3.05},'Geografia':{enade:2.45,cpc:3.45,idd:2.95},'História':{enade:2.50,cpc:3.51,idd:3.13},'Letras-Português e Espanhol':{enade:2.22,cpc:3.26,idd:2.66},'Letras-Português e Inglês':{enade:2.66,cpc:3.40,idd:3.01},'Matemática':{enade:2.24,cpc:3.34,idd:3.00},'Medicina':{enade:2.88,cpc:3.36,idd:2.88},'Pedagogia':{enade:2.35,cpc:3.33,idd:3.02},'Química':{enade:2.41,cpc:3.52,idd:3.04},'Sistemas de Informação':{enade:2.25,cpc:3.29,idd:2.98},'Tecnologia em Gestão Ambiental':{enade:2.74,cpc:3.32,idd:2.76},'Turismo':{enade:2.69,cpc:3.24,idd:2.65},'Zootecnia':{enade:2.64,cpc:3.55,idd:2.99} };
+   543→   543→    
+   544→   544→    const forecastData = [
+   545→   545→      {curso:'Medicina', campus:'Campo Grande', area:'Saúde e bem-estar', ano:'Anual'},
+   546→   546→      {curso:'Geografia (Licenciatura)', campus:'Campo Grande', area:'Educação', ano:'Anual'},
+   547→   547→      {curso:'História', campus:'Campo Grande', area:'Educação', ano:'Anual'},
+   548→   548→      {curso:'Letras (Português/Inglês/Espanhol)', campus:'Campo Grande', area:'Educação', ano:'Anual'},
+   549→   549→      {curso:'Pedagogia', campus:'Campo Grande', area:'Educação', ano:'Anual'},
+   550→   550→      {curso:'Letras', campus:'Cassilândia', area:'Educação', ano:'Anual'},
+   551→   551→      {curso:'Matemática', campus:'Cassilândia', area:'Educação', ano:'Anual'},
+   552→   552→      {curso:'Física', campus:'Dourados', area:'Educação', ano:'Anual'},
+   553→   553→      {curso:'Letras', campus:'Dourados', area:'Educação', ano:'Anual'},
+   554→   554→      {curso:'Matemática', campus:'Dourados', area:'Educação', ano:'Anual'},
+   555→   555→      {curso:'Pedagogia', campus:'Dourados', area:'Educação', ano:'Anual'},
+   556→   556→      {curso:'Ciências Biológicas (Licenciatura)', campus:'Ivinhema', area:'Educação', ano:'Anual'},
+   557→   557→      {curso:'Geografia (Licenciatura)', campus:'Jardim', area:'Educação', ano:'Anual'},
+   558→   558→      {curso:'Letras', campus:'Jardim', area:'Educação', ano:'Anual'},
+   559→   559→      {curso:'Pedagogia', campus:'Maracaju', area:'Educação', ano:'Anual'},
+   560→   560→      {curso:'Ciências Biológicas (Licenciatura)', campus:'Mundo Novo', area:'Educação', ano:'Anual'},
+   561→   561→      {curso:'Química (Licenciatura)', campus:'Naviraí', area:'Educação', ano:'Anual'},
+   562→   562→      {curso:'Matemática', campus:'Nova Andradina', area:'Educação', ano:'Anual'},
+   563→   563→      {curso:'Ciências Sociais', campus:'Paranaíba', area:'Educação', ano:'Anual'},
+   564→   564→      {curso:'Pedagogia', campus:'Paranaíba', area:'Educação', ano:'Anual'},
+   565→   565→      {curso:'Ciências Biológicas (Bacharelado)', campus:'Campo Grande', area:'Ciências naturais, matemática e estatística', ano:2026},
+   566→   566→      {curso:'Ciências Biológicas (Bacharelado)', campus:'Dourados', area:'Ciências naturais, matemática e estatística', ano:2026},
+   567→   567→      {curso:'Química / Química Industrial', campus:'Dourados', area:'Ciências naturais, matemática e estatística', ano:2026},
+   568→   568→      {curso:'Gestão Ambiental', campus:'Mundo Novo', area:'Engenharia, produção e construção', ano:2026},
+   569→   569→      {curso:'Ciência da Computação', campus:'Dourados', area:'Computação e TIC', ano:2026},
+   570→   570→      {curso:'Sistemas de Informação', campus:'Dourados', area:'Computação e TIC', ano:2026},
+   571→   571→      {curso:'Sistemas de Informação', campus:'Nova Andradina', area:'Computação e TIC', ano:2026},
+   572→   572→      {curso:'Engenharia Ambiental e Sanitária', campus:'Dourados', area:'Engenharia, produção e construção', ano:2026},
+   573→   573→      {curso:'Engenharia Civil', campus:'Nova Andradina', area:'Engenharia, produção e construção', ano:2026},
+   574→   574→      {curso:'Engenharia de Alimentos', campus:'Naviraí', area:'Engenharia, produção e construção', ano:2026},
+   575→   575→      {curso:'Engenharia Florestal', campus:'Aquidauana', area:'Agricultura, silvicultura, pesca e veterinária', ano:2026},
+   576→   576→      {curso:'Agronomia', campus:'Aquidauana', area:'Agricultura, silvicultura, pesca e veterinária', ano:2027},
+   577→   577→      {curso:'Agronomia', campus:'Cassilândia', area:'Agricultura, silvicultura, pesca e veterinária', ano:2027},
+   578→   578→      {curso:'Agronomia', campus:'Maracaju', area:'Agricultura, silvicultura, pesca e veterinária', ano:2027},
+   579→   579→      {curso:'Agronomia', campus:'Mundo Novo', area:'Agricultura, silvicultura, pesca e veterinária', ano:2027},
+   580→   580→      {curso:'Zootecnia', campus:'Aquidauana', area:'Agricultura, silvicultura, pesca e veterinária', ano:2027},
+   581→   581→      {curso:'Enfermagem', campus:'Dourados', area:'Saúde e bem-estar', ano:2027},
+   582→   582→      {curso:'Fonoaudiologia', campus:'Campo Grande', area:'Saúde e bem-estar', ano:2027},
+   583→   583→      {curso:'Psicologia', campus:'Campo Grande', area:'Ciências sociais, comunicação e informação', ano:2027},
+   584→   584→      {curso:'Psicologia', campus:'Coxim', area:'Ciências sociais, comunicação e informação', ano:2027},
+   585→   585→      {curso:'Turismo', campus:'Campo Grande', area:'Serviços', ano:2027},
+   586→   586→      {curso:'Turismo', campus:'Dourados', area:'Serviços', ano:2027},
+   587→   587→      {curso:'Administração', campus:'Maracaju', area:'Negócios, administração e direito', ano:2028},
+   588→   588→      {curso:'Administração', campus:'Ponta Porã', area:'Negócios, administração e direito', ano:2028},
+   589→   589→      {curso:'Administração Pública', campus:'Campo Grande', area:'Negócios, administração e direito', ano:2028},
+   590→   590→      {curso:'Ciências Contábeis', campus:'Ponta Porã', area:'Negócios, administração e direito', ano:2028},
+   591→   591→      {curso:'Ciências Econômicas', campus:'Ponta Porã', area:'Ciências sociais, comunicação e informação', ano:2028},
+   592→   592→      {curso:'Direito', campus:'Aquidauana', area:'Negócios, administração e direito', ano:2028},
+   593→   593→      {curso:'Direito', campus:'Bataguassu', area:'Negócios, administração e direito', ano:2028},
+   594→   594→      {curso:'Direito', campus:'Campo Grande', area:'Negócios, administração e direito', ano:2028},
+   595→   595→      {curso:'Direito (Caso especial - 2 turmas)', campus:'Cassilândia', area:'Negócios, administração e direito', ano:2028},
+   596→   596→      {curso:'Direito', campus:'Dourados', area:'Negócios, administração e direito', ano:2028},
+   597→   597→      {curso:'Direito', campus:'Jardim', area:'Negócios, administração e direito', ano:2028},
+   598→   598→      {curso:'Direito', campus:'Naviraí', area:'Negócios, administração e direito', ano:2028},
+   599→   599→      {curso:'Direito', campus:'Paranaíba', area:'Negócios, administração e direito', ano:2028}
+   600→   600→    ];
+   601→   601→
+   602→   602→    const courseDataRaw = [ {area:'Ciências Biológicas (extinto)',codigo:'45711',municipio:'Coxim',idd2021:2.819,cpc2021:2.574,enade2021:2.265}, {area:'Ciências Sociais (em extinção)',codigo:'113050',municipio:'Amambai',idd2021:0.603,cpc2021:1.589,enade2021:0}, {area:'História (em extinção)',codigo:'68265',municipio:'Amambai',idd2021:2.447,cpc2021:2.863,enade2021:0.886}, {area:'Ciência da Computação',codigo:'68321',municipio:'Dourados',idd2021:2.728,cpc2021:3.035,enade2021:2.053}, {area:'Ciência da Computação',codigo:'150102',municipio:'Nova Andradina',idd2021:0,cpc2021:1.569,enade2021:1.42}, {area:'Ciências Biológicas',codigo:'45713',municipio:'Ivinhema',idd2021:2.272,cpc2021:2.398,enade2021:1.737}, {area:'Ciências Biológicas',codigo:'45715',municipio:'Mundo Novo',idd2021:2.297,cpc2021:2.837,enade2021:1.814}, {area:'Ciências Biológicas',codigo:'50933',municipio:'Dourados',idd2021:2.067,cpc2021:2.940,enade2021:2.305}, {area:'Ciências Biológicas',codigo:'1190630',municipio:'Ivinhema',idd2021:2.283,cpc2021:2.866,enade2021:1.972}, {area:'Ciências Biológicas',codigo:'1190631',municipio:'Dourados',idd2021:1.911,cpc2021:2.662,enade2021:1.625}, {area:'Ciências Sociais',codigo:'123588',municipio:'Paranaíba',idd2021:3.101,cpc2021:2.991,enade2021:2.598}, {area:'Ciências Sociais',codigo:'1265863',municipio:'Paranaíba',idd2021:2.978,cpc2021:2.604,enade2021:0.788}, {area:'Física',codigo:'105928',municipio:'Dourados',idd2021:2.774,cpc2021:2.909,enade2021:1.993}, {area:'Geografia',codigo:'105780',municipio:'Jardim',idd2021:2.421,cpc2021:2.670,enade2021:1.870}, {area:'Geografia',codigo:'150104',municipio:'Campo Grande',idd2021:2.049,cpc2021:2.975,enade2021:2.532}, {area:'Geografia',codigo:'1313326',municipio:'Campo Grande',idd2021:2.523,cpc2021:3.062,enade2021:2.042}, {area:'Letras-Português e Espanhol',codigo:'89022',municipio:'Dourados',idd2021:1.237,cpc2021:2.078,enade2021:0.840}, {area:'Letras-Português e Espanhol',codigo:'150105',municipio:'Campo Grande',idd2021:1.370,cpc2021:2.199,enade2021:1.657}, {area:'Letras-Português e Inglês',codigo:'89018',municipio:'Dourados',idd2021:1.484,cpc2021:2.295,enade2021:1.190}, {area:'Letras-Português e Inglês',codigo:'89024',municipio:'Cassilândia',idd2021:0.210,cpc2021:1.580,enade2021:1.406}, {area:'Letras-Português e Inglês',codigo:'89029',municipio:'Jardim',idd2021:2.029,cpc2021:2.389,enade2021:1.873}, {area:'Letras-Português e Inglês',codigo:'150106',municipio:'Campo Grande',idd2021:1.344,cpc2021:2.410,enade2021:2.855}, {area:'Matemática',codigo:'45701',municipio:'Cassilândia',idd2021:1.128,cpc2021:1.959,enade2021:1.584}, {area:'Matemática',codigo:'45703',municipio:'Nova Andradina',idd2021:1.502,cpc2021:2.155,enade2021:1.181}, {area:'Matemática',codigo:'68313',municipio:'Dourados',idd2021:1.372,cpc2021:2.368,enade2021:1.358}, {area:'Pedagogia',codigo:'113052',municipio:'Campo Grande',idd2021:2.562,cpc2021:3.135,enade2021:3.397}, {area:'Pedagogia',codigo:'113054',municipio:'Maracaju',idd2021:2.030,cpc2021:2.354,enade2021:1.732}, {area:'Pedagogia',codigo:'113056',municipio:'Paranaíba',idd2021:2.260,cpc2021:3.112,enade2021:2.527}, {area:'Pedagogia',codigo:'113058',municipio:'Dourados',idd2021:2.632,cpc2021:3.133,enade2021:2.656}, {area:'Química',codigo:'50935',municipio:'Dourados',idd2021:4.045,cpc2021:3.554,enade2021:3.142}, {area:'Química',codigo:'51044',municipio:'Naviraí',idd2021:2.303,cpc2021:2.323,enade2021:1.629}, {area:'Sistemas de Informação',codigo:'95706',municipio:'Dourados',idd2021:3.848,cpc2021:3.602,enade2021:3.564}, {area:'Direito',codigo:'17762',municipio:'Paranaíba',idd2022:1.540,cpc2022:2.320,enade2022:2.571}, {area:'Direito',codigo:'17766',municipio:'Dourados',idd2022:2.345,cpc2022:2.509,enade2022:3.286}, {area:'Turismo',codigo:'45605',municipio:'Dourados',idd2022:3.328,cpc2022:3.281,enade2022:2.686}, {area:'Direito',codigo:'68315',municipio:'Naviraí',idd2022:3.111,cpc2022:2.887,enade2022:3.241}, {area:'Ciências Econômicas',codigo:'68319',municipio:'Ponta Porã',idd2022:2.161,cpc2022:2.437,enade2022:1.292}, {area:'Ciências Contábeis',codigo:'95708',municipio:'Ponta Porã',idd2022:1.823,cpc2022:2.437,enade2022:2.442}, {area:'Administração',codigo:'113045',municipio:'Ponta Porã',idd2022:1.946,cpc2022:2.208,enade2022:2.024}, {area:'Administração',codigo:'113047',municipio:'Maracaju',idd2022:0.128,cpc2022:1.755,enade2022:1.409}, {area:'Turismo',codigo:'5000476',municipio:'Campo Grande',idd2022:0.900,cpc2022:2.169,enade2022:2.284}, {area:'Engenharia Florestal',codigo:'123562',municipio:'Aquidauana',idd2023:1.891,cpc2023:2.182,enade2023:1.399}, {area:'Zootecnia',codigo:'17735',municipio:'Aquidauana',idd2023:0.150,cpc2023:1.574,enade2023:0.401}, {area:'Agronomia',codigo:'45598',municipio:'Aquidauana',idd2023:1.491,cpc2023:2.539,enade2023:2.099}, {area:'Agronomia',codigo:'51042',municipio:'Cassilândia',idd2023:1.699,cpc2023:2.578,enade2023:2.301}, {area:'Engenharia Ambiental e Sanitária',codigo:'1117933',municipio:'Dourados',idd2023:0.857,cpc2023:2.180,enade2023:1.806}, {area:'Medicina',codigo:'1313341',municipio:'Campo Grande',idd2023:2.897,cpc2023:3.215,enade2023:3.774}, {area:'Engenharia de Alimentos',codigo:'1314210',municipio:'Naviraí',idd2023:2.924,cpc2023:2.656,enade2023:0.942}, {area:'Tecnologia em Gestão Ambiental',codigo:'5000475',municipio:'Mundo Novo',idd2023:2.994,cpc2023:3.516,enade2023:3.101}, {area:'Enfermagem',codigo:'17768',municipio:'Dourados',idd2023:2.408,cpc2023:2.789,enade2023:2.770} ];
+   603→   603→
+   604→   604→    let allData = [];
+   605→   605→    let curCol = 'cp', curDir = 'desc';
+   606→   606→
+   607→   607→    function getLatestValue(r, i) { 
+   608→   608→      for(let y of [2025,2024,2023,2022,2021]) { 
+   609→   609→        if(r[i+y]!=null) return r[i+y]; 
+   610→   610→      } 
+   611→   611→      return null; 
+   612→   612→    }
+   613→   613→    
+   614→   614→    function convertToRange(v) { 
+   615→   615→      if(v===null||v===undefined) return null; 
+   616→   616→      if(v < 0.945) return 1; 
+   617→   617→      if(v < 1.945) return 2; 
+   618→   618→      if(v < 2.945) return 3; 
+   619→   619→      if(v < 3.945) return 4; 
+   620→   620→      return 5; 
+   621→   621→    }
+   622→   622→
+   623→   623→    const statusConfig = {
+   624→   624→      1: { label: 'Não atende', cl: 'bg-[#DC2626]' },
+   625→   625→      2: { label: 'Insuficiente', cl: 'bg-[#F87171]' },
+   626→   626→      3: { label: 'Suficiente', cl: 'bg-[#EAB308]' },
+   627→   627→      4: { label: 'Bom', cl: 'bg-[#4ADE80]' },
+   628→   628→      5: { label: 'Muito bom', cl: 'bg-[#16A34A]' }
+   629→   629→    };
+   630→   630→
+   631→   631→    function getBadgeHtml(faixa, valor, size = 'sm') {
+   632→   632→      if (valor == null) return `<div class="px-3 py-1 bg-slate-100 rounded-md border text-slate-950 text-base font-black">-</div>`;
+   633→   633→      let st = statusConfig[faixa] || { label: 'S/D', cl: 'bg-slate-400' };
+   634→   634→      let v = Number(valor);
+   635→   635→      let txtColor = (faixa === 3 || faixa === 4) ? 'text-slate-950' : 'text-white';
+   636→   636→      if (size === 'lg') {
+   637→   637→        return `<div class="inline-flex rounded-xl overflow-hidden border border-slate-300 shadow-md"><div class="flex items-center justify-center min-w-[60px] px-6 py-4 font-black text-5xl ${txtColor} ${st.cl}">${faixa}</div><div class="flex items-center justify-center min-w-[90px] px-6 py-4 font-black text-5xl bg-[#fffcf0] text-slate-900">${v.toFixed(2)}</div></div>`;
+   638→   638→      }
+   639→   639→      return `<div class="inline-flex rounded-lg overflow-hidden border border-slate-300 shadow-sm"><div class="flex items-center justify-center min-w-[40px] px-3 py-2 font-black text-lg ${txtColor} ${st.cl}">${faixa}</div><div class="flex items-center justify-center min-w-[64px] px-3 py-2 font-black text-lg bg-[#fffcf0] text-slate-900">${v.toFixed(2)}</div></div>`;
+   640→   640→    }
+   641→   641→
+   642→   642→    function createBadge(v, nV) {
+   643→   643→      if(v==null) return `<div class="inline-flex rounded-md border border-slate-400 bg-slate-50"><div class="px-3 py-1 font-black text-sm">-</div></div>`;
+   644→   644→      let r = convertToRange(v);
+   645→   645→      let st = statusConfig[r] || { label: 'S/D', cl: 'bg-slate-400' };
+   646→   646→      let txtColor = (r === 3 || r === 4) ? 'text-slate-900' : 'text-white';
+   647→   647→      let icon = (nV!=null) ? (v-nV > 0 ? `<svg class="w-2.5 h-2.5 ml-1 inline text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>` : (v-nV < 0 ? `<svg class="w-2.5 h-2.5 ml-1 inline text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>` : `<span class="ml-1 text-xs font-black">=</span>`)) : '';
+   648→   648→      let tooltip = nV != null ? `Média Nacional: ${nV.toFixed(2)}` : 'Sem Referência';
+   649→   649→      return `<div title="${tooltip}" class="inline-flex rounded-lg overflow-hidden border border-slate-400 cursor-help"><div class="flex items-center justify-center min-w-[32px] px-2 py-1.5 font-black text-base ${txtColor} ${st.cl}">${r}</div><div class="flex items-center justify-center min-w-[50px] px-2 py-1.5 font-black text-base bg-[#fffcf0] text-slate-900">${v.toFixed(3)}${icon}</div></div>`;
+   650→   650→    }
+   651→   651→
+   652→   652→    function switchTab(tabId) {
+   653→   653→      document.getElementById('view-results').classList.toggle('hidden', tabId !== 'results');
+   654→   654→      document.getElementById('view-forecast').classList.toggle('hidden', tabId !== 'forecast');
+   655→   655→      document.getElementById('btn-tab-results').classList.toggle('active', tabId === 'results');
+   656→   656→      document.getElementById('btn-tab-forecast').classList.toggle('active', tabId === 'forecast');
+   657→   657→      if(tabId === 'forecast') renderForecastTable();
+   658→   658→    }
+   659→   659→
+   660→   660→    function handleSort(c) {
+   661→   661→      curDir = (curCol === c && curDir === 'desc') ? 'asc' : 'desc'; 
+   662→   662→      curCol = c;
+   663→   663→      ['en','id','cp'].forEach(x => { 
+   664→   664→        let el = document.getElementById('sort-' + x);
+   665→   665→        if (el) { 
+   666→   666→          el.textContent = x === curCol ? (curDir === 'desc' ? '↓' : '↑') : '↕'; 
+   667→   667→          el.className = x === curCol ? 'text-blue-900 text-sm font-black' : 'text-slate-500 text-xs'; 
+   668→   668→        }
+   669→   669→      });
+   670→   670→      renderTable();
+   671→   671→    }
+   672→   672→
+   673→   673→    function renderTable() {
+   674→   674→      const fc = document.getElementById('filterCourse').value;
+   675→   675→      const fg = document.getElementById('filterGrau').value;
+   676→   676→      const fm = document.getElementById('filterCampus').value;
+   677→   677→      const fs = document.getElementById('filterStatus').value;
+   678→   678→      
+   679→   679→      const filtered = allData.filter(r => {
+   680→   680→        let grau = grauMap[r.codigo] ? ` (${grauMap[r.codigo]})` : '';
+   681→   681→        let grauReal = grauMap[r.codigo] || '';
+   682→   682→        
+   683→   683→        return (!fc || `${r.area}${grau}` === fc) && 
+   684→   684→               (!fg || grauReal === fg) &&
+   685→   685→               (!fm || r.municipio === fm) && 
+   686→   686→               (!fs || (r.fn >= 4 && fs === 'BOM') || (r.fn === 3 && fs === 'SUFICIENTE') || (r.fn <= 2 && fs === 'INSUFICIENTE'));
+   687→   687→      });
+   688→   688→      
+   689→   689→      filtered.sort((a,b) => {
+   690→   690→        let valA = a[curCol] ?? -1;
+   691→   691→        let valB = b[curCol] ?? -1;
+   692→   692→        if (valA !== valB) return (curDir === 'desc' ? -1 : 1) * (valA - valB);
+   693→   693→        return a.area.localeCompare(b.area);
+   694→   694→      });
+   695→   695→
+   696→   696→      const recordEl = document.getElementById('recordCount');
+   697→   697→      if(recordEl) recordEl.textContent = filtered.length;
+   698→   698→
+   699→   699→      const body = document.getElementById('allCoursesTableBody');
+   700→   700→      if(body) {
+   701→   701→        body.innerHTML = filtered.map(r => {
+   702→   702→            let ac = r.area.replace(' (extinto)', '').replace(' (em extinção)', '').trim();
+   703→   703→            let b = nationalBenchmarks[ac]||{};
+   704→   704→            let gs = grauMap[r.codigo] ? ` (${grauMap[r.codigo]})` : '';
+   705→   705→            return `<tr class="hover:bg-blue-50 transition-colors cursor-pointer border-b border-slate-100" onclick="openModal('${r.codigo}')">
+   706→   706→                <td class="py-4 px-6"><div class="flex flex-col"><span class="font-black text-blue-950">${r.area}${gs}</span><span class="text-xs font-bold uppercase text-slate-500 tracking-wider mt-1">CÓD: ${r.codigo}</span></div></td>
+   707→   707→                <td class="py-4 px-6 text-center font-black uppercase text-sm">${r.municipio}</td>
+   708→   708→                <td class="py-4 px-2 text-center">${createBadge(r.en, b.enade)}</td>
+   709→   709→                <td class="py-4 px-2 text-center">${createBadge(r.id, b.idd)}</td>
+   710→   710→                <td class="py-4 px-2 text-center">${createBadge(r.cp, b.cpc)}</td>
+   711→   711→                <td class="py-4 px-6 text-center"><span class="px-3 py-1.5 ${statusConfig[r.fn]?.cl || 'bg-slate-400'} ${r.fn >= 3 && r.fn <= 4 ? 'text-slate-900' : 'text-white'} rounded-lg text-xs font-black uppercase tracking-wider inline-block">${statusConfig[r.fn]?.label || 'S/D'}</span></td>
+   712→   712→            </tr>`;
+   713→   713→        }).join('');
+   714→   714→      }
+   715→   715→    }
+   716→   716→
+   717→   717→    function initTable() {
+   718→   718→      allData = courseDataRaw.map(r => {
+   719→   719→        let en=getLatestValue(r,'enade'), cp=getLatestValue(r,'cpc'), id=getLatestValue(r,'idd');
+   720→   720→        let fn = convertToRange(cp) ?? convertToRange(en);
+   721→   721→        return { ...r, en, cp, id, fn };
+   722→   722→      });
+   723→   723→      
+   724→   724→      let hl=0, cr=0, hlMap={}, crMap={};
+   725→   725→      allData.forEach(r => {
+   726→   726→        let base = r.area.replace(' (extinto)', '').replace(' (em extinção)', '').trim();
+   727→   727→        let g = grauMap[r.codigo] ? ` (${grauMap[r.codigo]})` : '';
+   728→   728→        let cn = base === 'Geografia' ? base + g : base;
+   729→   729→        
+   730→   730→        if(r.fn >= 4) { 
+   731→   731→          hl++; 
+   732→   732→          if(!hlMap[cn]) hlMap[cn] = [];
+   733→   733→          hlMap[cn].push(r.municipio); 
+   734→   734→        }
+   735→   735→        if(r.fn != null && r.fn <= 2) { 
+   736→   736→          cr++; 
+   737→   737→          if(!crMap[cn]) crMap[cn] = [];
+   738→   738→          crMap[cn].push(r.municipio); 
+   739→   739→        }
+   740→   740→      });
+   741→   741→      
+   742→   742→      document.getElementById('highlightCount').textContent = hl;
+   743→   743→      document.getElementById('criticalCount').textContent = cr;
+   744→   744→      document.getElementById('highlightPercentage').textContent = Math.round((hl/allData.length)*100) + '%';
+   745→   745→      document.getElementById('criticalPercentage').textContent = Math.round((cr/allData.length)*100) + '%';
+   746→   746→      document.getElementById('totalRecords').textContent = allData.length;
+   747→   747→      
+   748→   748→      const renderTags = (id, mapObj, cl) => {
+   749→   749→        const el = document.getElementById(id);
+   750→   750→        if(el) {
+   751→   751→            let html = '';
+   752→   752→            let keys = Object.keys(mapObj).sort();
+   753→   753→            for(let course of keys) {
+   754→   754→                let campuses = [...new Set(mapObj[course])].join(', ');
+   755→   755→                html += `<span title="Unidade Universitária: ${campuses}" class="inline-block px-3 py-1.5 bg-white ${cl} text-[11px] font-black rounded-lg border border-slate-200 shadow-sm uppercase truncate max-w-[200px] cursor-help hover:bg-slate-50 transition-colors">${course}</span>`;
+   756→   756→            }
+   757→   757→            el.innerHTML = html;
+   758→   758→        }
+   759→   759→      };
+   760→   760→      
+   761→   761→      renderTags('highlightBadges', hlMap, 'text-emerald-700');
+   762→   762→      renderTags('criticalBadges', crMap, 'text-red-700');
+   763→   763→      
+   764→   764→      let fc=document.getElementById('filterCourse'), fm=document.getElementById('filterCampus');
+   765→   765→      [...new Set(allData.map(r => `${r.area}${grauMap[r.codigo]?` (${grauMap[r.codigo]})`:''}`))].sort().forEach(c => fc.add(new Option(c,c)));
+   766→   766→      [...new Set(allData.map(r => r.municipio))].sort().forEach(m => fm.add(new Option(m,m)));
+   767→   767→      
+   768→   768→      document.getElementById('instTopBadge').innerHTML = getBadgeHtml(convertToRange(2.87), 2.87, 'lg');
+   769→   769→      document.getElementById('instEnadeBadge').innerHTML = getBadgeHtml(convertToRange(2.01), 2.01);
+   770→   770→      document.getElementById('instIddBadge').innerHTML = getBadgeHtml(convertToRange(2.02), 2.02);
+   771→   771→      document.getElementById('instCpcBadge').innerHTML = getBadgeHtml(convertToRange(2.57), 2.57);
+   772→   772→      
+   773→   773→      renderTable(); 
+   774→   774→      buildCampusCharts(); 
+   775→   775→      renderStateComparison(); 
+   776→   776→      renderForecastTable();
+   777→   777→      renderEnadePieChart();
+   778→   778→    }
+   779→   779→
+   780→   780→    function renderEnadePieChart() {
+   781→   781→      let counts = {1:0, 2:0, 3:0, 4:0, 5:0};
+   782→   782→      let total = 0;
+   783→   783→      
+   784→   784→      allData.forEach(r => {
+   785→   785→        if(!r.area.includes('extinto') && !r.area.includes('extinção')) {
+   786→   786→          let range = convertToRange(r.en);
+   787→   787→          if (range) {
+   788→   788→            counts[range]++;
+   789→   789→            total++;
+   790→   790→          }
+   791→   791→        }
+   792→   792→      });
+   793→   793→
+   794→   794→      const ctx = document.getElementById('enadePieChart');
+   795→   795→      if (!ctx) return;
+   796→   796→      
+   797→   797→      if (window.enadeChartInstance) {
+   798→   798→          window.enadeChartInstance.destroy();
+   799→   799→      }
+   800→   800→      
+   801→   801→      const data = [counts[1], counts[2], counts[3], counts[4], counts[5]];
+   802→   802→      const labels = [
+   803→   803→          'Não atende (0,000 a 0,944)',
+   804→   804→          'Insuficiente (0,945 a 1,944)',
+   805→   805→          'Suficiente (1,945 a 2,944)',
+   806→   806→          'Bom (2,945 a 3,944)',
+   807→   807→          'Muito bom (3,945 a 5,000)'
+   808→   808→      ];
+   809→   809→      const colors = ['#DC2626', '#F87171', '#EAB308', '#4ADE80', '#16A34A'];
+   810→   810→      const shortLabels = ['Não atende', 'Insuficiente', 'Suficiente', 'Bom', 'Muito bom'];
+   811→   811→      
+   812→   812→      window.enadeChartInstance = new Chart(ctx, {
+   813→   813→          type: 'pie',
+   814→   814→          data: {
+   815→   815→              labels: labels,
+   816→   816→              datasets: [{
+   817→   817→                  data: data,
+   818→   818→                  backgroundColor: colors,
+   819→   819→                  borderWidth: 3,
+   820→   820→                  borderColor: '#ffffff',
+   821→   821→                  hoverOffset: 20
+   822→   822→              }]
+   823→   823→          },
+   824→   824→          options: {
+   825→   825→              responsive: true,
+   826→   826→              maintainAspectRatio: false,
+   827→   827→              layout: { padding: 25 },
+   828→   828→              animation: { animateScale: true, animateRotate: true, duration: 1200, easing: 'easeOutQuart' },
+   829→   829→              plugins: {
+   830→   830→                  legend: { display: false },
+   831→   831→                  tooltip: {
+   832→   832→                      backgroundColor: 'rgba(11, 20, 40, 0.95)',
+   833→   833→                      titleFont: { family: 'Inter', size: 14, weight: 'bold' },
+   834→   834→                      bodyFont: { family: 'Inter', size: 15, weight: 'bold' },
+   835→   835→                      padding: 16,
+   836→   836→                      cornerRadius: 16,
+   837→   837→                      boxPadding: 8,
+   838→   838→                      usePointStyle: true,
+   839→   839→                      borderColor: 'rgba(255,255,255,0.1)',
+   840→   840→                      borderWidth: 1,
+   841→   841→                      displayColors: true,
+   842→   842→                      callbacks: {
+   843→   843→                          title: function() { return ''; },
+   844→   844→                          label: function(context) {
+   845→   845→                              let value = context.raw;
+   846→   846→                              let pct = total > 0 ? Math.round((value / total) * 100) : 0;
+   847→   847→                              return `  ${shortLabels[context.dataIndex]}: ${pct}% dos cursos (${value})`;
+   848→   848→                          }
+   849→   849→                      }
+   850→   850→                  }
+   851→   851→              }
+   852→   852→          }
+   853→   853→      });
+   854→   854→
+   855→   855→      const legendContainer = document.getElementById('enadePieLegend');
+   856→   856→      let legendHTML = '';
+   857→   857→      for(let i=5; i>=1; i--) {
+   858→   858→          let pct = total > 0 ? Math.round((counts[i] / total) * 100) : 0;
+   859→   859→          legendHTML += `
+   860→   860→          <div class="group flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_20px_-5px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 cursor-default">
+   861→   861→              <div class="flex items-center gap-4">
+   862→   862→                  <div class="w-12 h-12 shrink-0 rounded-xl flex items-center justify-center text-white font-black shadow-inner text-xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3" style="background-color: ${colors[i-1]}">${i}</div>
+   863→   863→                  <div>
+   864→   864→                      <p class="text-sm font-black text-slate-800 uppercase leading-tight">${shortLabels[i-1]}</p>
+   865→   865→                      <p class="text-[11px] font-bold text-slate-500 mt-0.5">${labels[i-1].split('(')[1].replace(')','')}</p>
+   866→   866→                  </div>
+   867→   867→              </div>
+   868→   868→              <div class="text-right pl-4">
+   869→   869→                  <p class="text-2xl font-black text-slate-900 leading-tight">${pct}%</p>
+   870→   870→                  <p class="text-[10px] font-bold text-slate-500 uppercase mt-0.5 tracking-wider inline-block">${counts[i]} cursos</p>
+   871→   871→              </div>
+   872→   872→          </div>`;
+   873→   873→      }
+   874→   874→      legendContainer.innerHTML = legendHTML;
+   875→   875→    }
+   876→   876→
+   877→   877→    function renderForecastTable() {
+   878→   878→      const yf = document.getElementById('filterForecastYear').value;
+   879→   879→      const counts = {Anual:0, 2026:0, 2027:0, 2028:0};
+   880→   880→      forecastData.forEach(f => counts[f.ano]++);
+   881→   881→      
+   882→   882→      document.getElementById('countAnual').textContent = counts.Anual;
+   883→   883→      document.getElementById('count2026').textContent = counts[2026];
+   884→   884→      document.getElementById('count2027').textContent = counts[2027];
+   885→   885→      document.getElementById('count2028').textContent = counts[2028];
+   886→   886→      
+   887→   887→      let fd = yf ? forecastData.filter(d => d.ano.toString() === yf) : forecastData;
+   888→   888→      document.getElementById('forecastTableBody').innerHTML = fd.map(f => {
+   889→   889→        let bcl = f.ano === 'Anual' ? 'bg-purple-100 text-purple-950' : f.ano === 2026 ? 'bg-blue-100 text-blue-950' : f.ano === 2027 ? 'bg-emerald-100 text-emerald-950' : 'bg-amber-100 text-amber-950';
+   890→   890→        return `<tr class="hover:bg-slate-50 border-b border-slate-100"><td class="py-5 px-8 font-black text-blue-950">${f.curso}</td><td class="py-5 px-6 font-black uppercase text-sm">${f.campus}</td><td class="py-5 px-6 font-black text-sm">${f.area}</td><td class="py-5 px-8 text-center"><span class="px-4 py-1.5 rounded-full font-black text-xs uppercase tracking-widest inline-block ${bcl}">${f.ano}</span></td></tr>`;
+   891→   891→      }).join('');
+   892→   892→    }
+   893→   893→
+   894→   894→    function buildCampusCharts() {
+   895→   895→      let map = {};
+   896→   896→      allData.forEach(r => { 
+   897→   897→        if(!r.area.includes('extinto') && !r.area.includes('extinção') && r.municipio !== 'Amambai') { 
+   898→   898→            if(!map[r.municipio]) map[r.municipio]={s:0,c:0}; 
+   899→   899→            let er=convertToRange(r.en); 
+   900→   900→            if(er){
+   901→   901→                map[r.municipio].s+=er; 
+   902→   902→                map[r.municipio].c++;
+   903→   903→            }
+   904→   904→        }
+   905→   905→      });
+   906→   906→      const arr = Object.keys(map).map(m=>({m,v:map[m].c>0?map[m].s/map[m].c:0,c:map[m].c})).sort((a,b)=>b.v-a.v);
+   907→   907→      document.getElementById('content-campus').innerHTML = arr.map(i=>`<div class="flex items-center gap-4 break-inside-avoid"><div class="w-40 text-right shrink-0"><p class="text-sm font-black uppercase leading-none truncate" title="${i.m}">${i.m}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${i.c} cursos</p></div><div class="flex-1 h-8 bg-slate-100 rounded-full overflow-hidden relative"><div class="h-full bg-gradient-to-r from-blue-700 to-cyan-500 flex items-center justify-end pr-3 bar-animate" style="width:${(i.v/5)*100}%"><span class="text-sm text-white font-black leading-none">${i.v.toFixed(2)}</span></div></div></div>`).join('');
+   908→   908→    }
+   909→   909→
+   910→   910→    function renderStateComparison() {
+   911→   911→      const data = [
+   912→   912→        {ies:'UEMS',en:[3,2.01],idd:[3,2.02],cp:[3,2.57],ig:[3,2.87]},
+   913→   913→        {ies:'UFGD',en:[3,2.56],idd:[3,2.72],cp:[4,3.20],ig:[4,3.65]},
+   914→   914→        {ies:'UFMS',en:[3,2.59],idd:[3,2.36],cp:[4,3.16],ig:[4,3.58]}
+   915→   915→      ];
+   916→   916→      document.getElementById('stateComparisonBody').innerHTML = data.map(d=>`<tr class="hover:bg-slate-50 border-b border-slate-50 break-inside-avoid"><td class="py-5 px-6 font-black text-2xl text-slate-900">${d.ies}</td><td class="py-5 px-2 text-center">${getBadgeHtml(d.en[0], d.en[1])}</td><td class="py-5 px-2 text-center">${getBadgeHtml(d.idd[0], d.idd[1])}</td><td class="py-5 px-2 text-center">${getBadgeHtml(d.cp[0], d.cp[1])}</td><td class="py-5 px-6 text-center">${getBadgeHtml(d.ig[0], d.ig[1])}</td></tr>`).join('');
+   917→   917→    }
+   918→   918→
+   919→   919→    function openModal(cod) {
+   920→   920→      const r = allData.find(x=>x.codigo===cod); 
+   921→   921→      if(!r) return;
+   922→   922→      
+   923→   923→      let ac = r.area.replace(' (extinto)', '').replace(' (em extinção)', '').trim(); 
+   924→   924→      let b = nationalBenchmarks[ac]||{};
+   925→   925→      
+   926→   926→      let cursoNome = `${r.area}${grauMap[cod]?` (${grauMap[cod]})`:''}`;
+   927→   927→      
+   928→   928→      // Monta os dados para a Tela
+   929→   929→      document.getElementById('modalCourseTitle').textContent = cursoNome;
+   930→   930→      document.getElementById('modalCourseSubtitle').textContent = `Unidade Universitária: ${r.municipio}`;
+   931→   931→      document.getElementById('modalCourseCodeBadge').textContent = `CÓD: ${cod}`;
+   932→   932→      
+   933→   933→      const fv = (v) => v == null ? '-' : Number(v).toFixed(3);
+   934→   934→      
+   935→   935→      const getH = (i) => {
+   936→   936→        let h = [21,22,23,24,25].map(y => r[i+'20'+y]);
+   937→   937→        let d = (h[0]!=null && h[4]!=null) ? (h[4]-h[0]) : 0;
+   938→   938→        return h.map((v, idx) => `<td class="py-3 px-1 sm:py-5 sm:px-3 ${idx >= 3 ? 'bg-slate-200' : ''}"><span class="inline-block px-1.5 py-1 sm:px-3 sm:py-1.5 rounded-lg font-black text-sm border border-slate-300 ${v!=null? statusConfig[convertToRange(v)].cl + (convertToRange(v)===3||convertToRange(v)===4 ? ' text-slate-950' : ' text-white') + ' shadow-md' : 'bg-slate-100 text-slate-950'}">${fv(v)}</span></td>`).join('') + `<td class="text-center py-3 px-1 sm:py-5 sm:px-3 font-black text-sm ${d > 0 ? 'text-green-800' : (d < 0 ? 'text-red-800' : 'text-slate-950')}">${d ? (d > 0 ? '+' : '') + d.toFixed(3) : '-'}</td>`;
+   939→   939→      };
+   940→   940→
+   941→   941→      const buildComp = (t,v,n) => {
+   942→   942→          if(v==null) return `<div class="bg-slate-50 rounded-xl p-4 border text-center text-xs font-black uppercase text-slate-500 flex items-center justify-center break-inside-avoid">${t} Indisponível</div>`;
+   943→   943→          let d = n != null ? (v-n) : 0;
+   944→   944→          let isP = d >= 0;
+   945→   945→          let faixa = convertToRange(v);
+   946→   946→          let faixaClass = statusConfig[faixa]?.cl || 'bg-slate-400';
+   947→   947→
+   948→   948→          return `<div class="bg-white rounded-2xl p-6 border border-slate-300 shadow-sm relative overflow-hidden break-inside-avoid">
+   949→   949→            <div class="flex justify-between items-start mb-4">
+   950→   950→                <h4 class="text-xs font-black uppercase text-slate-500 tracking-widest">${t}</h4>
+   951→   951→                ${n?`<span class="inline-block ${isP?'text-green-800 bg-green-100':'text-red-800 bg-red-100'} px-2 py-0.5 rounded shadow-sm border font-black text-[10px] uppercase">${isP?'↑':'↓'} ${Math.abs(d).toFixed(2)} vs Nac.</span>`:'<span class="text-[10px] font-black text-slate-500 uppercase">Sem Ref.</span>'}
+   952→   952→            </div>
+   953→   953→            <div class="flex justify-between items-end mb-2">
+   954→   954→                <div class="flex flex-col items-start gap-1">
+   955→   955→                    <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Contínuo</span>
+   956→   956→                    <div class="flex items-baseline gap-1"><span class="text-4xl font-black text-slate-900" title="Nota Contínua">${v.toFixed(3)}</span><span class="text-sm font-black text-slate-400">/ 5.0</span></div>
+   957→   957→                </div>
+   958→   958→                <div class="text-right flex flex-col items-center">
+   959→   959→                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Conceito</p>
+   960→   960→                    <div class="flex items-center justify-center w-10 h-10 rounded-2xl text-white font-black text-2xl shadow-lg border border-white/20 ${faixaClass}">${faixa}</div>
+   961→   961→                </div>
+   962→   962→            </div>
+   963→   963→            <div class="h-2 bg-slate-200 rounded-full mt-4 overflow-hidden relative w-full">
+   964→   964→                <div class="absolute top-0 left-0 h-full ${faixaClass}" style="width:${(v/5)*100}%"></div>
+   965→   965→                ${n != null ? `<div class="absolute top-[-2px] bottom-[-2px] w-1.5 bg-slate-900 rounded-full shadow-md z-10 border border-white" style="left:${(n/5)*100}%"></div>` : ''}
+   966→   966→            </div>
+   967→   967→            <div class="flex justify-between mt-2">
+   968→   968→                <span class="text-[10px] font-black text-slate-500 uppercase">Seu Curso</span>
+   969→   969→                ${n!=null?`<span class="text-[10px] font-black text-slate-500 uppercase">Média Nac. (${n.toFixed(2)})</span>`:''}
+   970→   970→            </div>
+   971→   971→          </div>`;
+   972→   972→      };
+   973→   973→      
+   974→   974→      // Prepara o conteúdo da TELA
+   975→   975→      document.getElementById('modalContent').innerHTML = `
+   976→   976→        <h3 class="text-base font-black text-slate-950 uppercase tracking-widest mb-6">Comparativo Institucional vs. Média Nacional</h3>
+   977→   977→        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+   978→   978→            ${buildComp('ENADE',r.en,b.enade)}
+   979→   979→            ${buildComp('IDD',r.id,b.idd)}
+   980→   980→            ${buildComp('CPC',r.cp,b.cpc)}
+   981→   981→        </div>
+   982→   982→        <h3 class="text-base font-black text-slate-950 uppercase tracking-widest mb-6 text-center mt-4">Histórico Detalhado</h3>
+   983→   983→        <div class="history-wrapper w-full overflow-x-auto overflow-y-visible rounded-[2rem] border border-slate-300 shadow-sm break-inside-avoid bg-white mb-8">
+   984→   984→            <table class="w-full text-sm text-center min-w-[800px]">
+   985→   985→                <thead>
+   986→   986→                    <tr class="bg-slate-200 text-slate-950 text-sm font-black border-b border-slate-400 uppercase tracking-widest">
+   987→   987→                        <th class="text-left py-6 px-10">Indicador</th><th>21</th><th>22</th><th>23</th><th>24</th><th>25</th><th class="px-10">Var</th>
+   988→   988→                    </tr>
+   989→   989→                </thead>
+   990→   990→                <tbody class="divide-y divide-slate-300 bg-white">
+   991→   991→                    <tr><td class="font-black py-5 px-10 uppercase text-sm text-slate-950 text-left">ENADE</td>${getH('enade')}</tr>
+   992→   992→                    <tr><td class="font-black py-5 px-10 uppercase text-sm text-slate-950 text-left">IDD</td>${getH('idd')}</tr>
+   993→   993→                    <tr><td class="font-black py-5 px-10 uppercase text-sm text-slate-950 text-left">CPC</td>${getH('cpc')}</tr>
+   994→   994→                </tbody>
+   995→   995→            </table>
+   996→   996→        </div>
+   997→   997→      `;
+   998→   998→
+   999→   999→      // =======================================================
+  1000→  1000→      // CONSTRUÇÃO DO CONTEÚDO PARA O PDF INSTITUCIONAL
+  1001→  1001→      // =======================================================
+  1002→  1002→      const formatNum = (v) => v == null ? '-' : Number(v).toFixed(3).replace('.', ',');
+  1003→  1003→      
+  1004→  1004→      const formatConcept = (v) => {
+  1005→  1005→          if(v == null) return '-';
+  1006→  1006→          let r = convertToRange(v);
+  1007→  1007→          if(r===1) return '1 - Não atende';
+  1008→  1008→          if(r===2) return '2 - Insuficiente';
+  1009→  1009→          if(r===3) return '3 - Suficiente';
+  1010→  1010→          if(r===4) return '4 - Bom';
+  1011→  1011→          if(r===5) return '5 - Muito bom';
+  1012→  1012→          return '-';
+  1013→  1013→      };
+  1014→  1014→      
+  1015→  1015→      const formatSit = (v, n) => {
+  1016→  1016→          if(v == null || n == null) return '<span class="text-gray-500">Sem Referência</span>';
+  1017→  1017→          let diff = v - n;
+  1018→  1018→          if(diff >= 0) return `<span class="text-blue-600 font-medium">Acima da Média (↑ ${diff.toFixed(2).replace('.',',')})</span>`;
+  1019→  1019→          return `<span class="text-red-600 font-medium">Abaixo da Média (↓ ${Math.abs(diff).toFixed(2).replace('.',',')})</span>`;
+  1020→  1020→      };
+  1021→  1021→
+  1022→  1022→      const getPrintH = (i) => {
+  1023→  1023→          let h = [21,22,23,24,25].map(y => r[i+'20'+y]);
+  1024→  1024→          let d = (h[0]!=null && h[4]!=null) ? (h[4]-h[0]) : 0;
+  1025→  1025→          let varHtml = '-';
+  1026→  1026→          if (h[0]!=null && h[4]!=null) {
+  1027→  1027→              if(d > 0) varHtml = `<span class="text-blue-600 font-bold">↑ +${d.toFixed(3).replace('.',',')}</span>`;
+  1028→  1028→              else if (d < 0) varHtml = `<span class="text-red-600 font-bold">↓ ${d.toFixed(3).replace('.',',')}</span>`;
+  1029→  1029→              else varHtml = `<span class="text-gray-600 font-bold">= 0,000</span>`;
+  1030→  1030→          }
+  1031→  1031→          return `
+  1032→  1032→              <td class="p-2">${h[0]==null ? '<span class="text-gray-400">-</span>' : formatNum(h[0])}</td>
+  1033→  1033→              <td class="p-2">${h[1]==null ? '<span class="text-gray-400">-</span>' : formatNum(h[1])}</td>
+  1034→  1034→              <td class="p-2">${h[2]==null ? '<span class="text-gray-400">-</span>' : formatNum(h[2])}</td>
+  1035→  1035→              <td class="p-2">${h[3]==null ? '<span class="text-gray-400">-</span>' : formatNum(h[3])}</td>
+  1036→  1036→              <td class="p-2">${h[4]==null ? '<span class="text-gray-400">-</span>' : formatNum(h[4])}</td>
+  1037→  1037→              <td class="p-2 text-right">${varHtml}</td>
+  1038→  1038→          `;
+  1039→  1039→      };
+  1040→  1040→
+  1041→  1041→      const dataAtual = new Date().toLocaleDateString('pt-BR');
+  1042→  1042→
+  1043→  1043→      document.getElementById('printArea').innerHTML = `
+  1044→  1044→        <div class="text-center mb-8">
+  1045→  1045→            <div class="mb-4 flex justify-center">
+  1046→  1046→                <img src="https://www.uems.br/anexos/imagens/conteudo/uems_imagens_2025-06-13_13-31-53.png" alt="Logo UEMS" class="h-24 mx-auto">
+  1047→  1047→            </div>
+  1048→  1048→            <h1 class="uems-blue text-xl font-bold uppercase tracking-tight">Divisão de Gestão do ENADE e Indicadores da Educação Superior</h1>
+  1049→  1049→            <h2 class="text-lg font-semibold uppercase">Relatório de Monitoramento de Curso - SINAES</h2>
+  1050→  1050→            <p class="text-sm text-gray-500">Data de Emissão: ${dataAtual}</p>
+  1051→  1051→        </div>
+  1052→  1052→
+  1053→  1053→        <section class="mb-8">
+  1054→  1054→            <h3 class="text-md font-bold border-b-2 border-gray-100 pb-1 mb-3 uppercase tracking-wide">1. Identificação do Curso</h3>
+  1055→  1055→            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+  1056→  1056→                <p><strong>Curso:</strong> ${cursoNome}</p>
+  1057→  1057→                <p><strong>Unidade Universitária:</strong> ${r.municipio}</p>
+  1058→  1058→                <p><strong>Código INEP:</strong> ${cod}</p>
+  1059→  1059→            </div>
+  1060→  1060→        </section>
+  1061→  1061→
+  1062→  1062→        <section class="mb-8">
+  1063→  1063→            <h3 class="text-md font-bold border-b-2 border-gray-100 pb-1 mb-3 uppercase tracking-wide">2. Resultados Consolidados (Último Ciclo Avaliativo)</h3>
+  1064→  1064→            <div class="overflow-x-auto">
+  1065→  1065→                <table class="w-full text-left text-sm border-collapse">
+  1066→  1066→                    <thead>
+  1067→  1067→                        <tr class="bg-uems-blue text-white font-semibold">
+  1068→  1068→                            <th class="p-3 border-b border-blue-900">Indicador</th>
+  1069→  1069→                            <th class="p-3 text-center border-b border-blue-900">Nota Contínua</th>
+  1070→  1070→                            <th class="p-3 border-b border-blue-900">Conceito Final</th>
+  1071→  1071→                            <th class="p-3 text-center border-b border-blue-900">Média Nacional</th>
+  1072→  1072→                            <th class="p-3 border-b border-blue-900 text-right">Situação vs. Nacional</th>
+  1073→  1073→                        </tr>
+  1074→  1074→                    </thead>
+  1075→  1075→                    <tbody class="table-zebra">
+  1076→  1076→                        <tr class="border-b border-gray-100">
+  1077→  1077→                            <td class="p-3 font-semibold">ENADE</td>
+  1078→  1078→                            <td class="p-3 text-center font-mono">${formatNum(r.en)}</td>
+  1079→  1079→                            <td class="p-3 font-semibold">${formatConcept(r.en)}</td>
+  1080→  1080→                            <td class="p-3 text-center">${formatNum(b.enade)}</td>
+  1081→  1081→                            <td class="p-3 text-right">${formatSit(r.en, b.enade)}</td>
+  1082→  1082→                        </tr>
+  1083→  1083→                        <tr class="border-b border-gray-100">
+  1084→  1084→                            <td class="p-3 font-semibold">IDD</td>
+  1085→  1085→                            <td class="p-3 text-center font-mono">${formatNum(r.id)}</td>
+  1086→  1086→                            <td class="p-3 font-semibold">${formatConcept(r.id)}</td>
+  1087→  1087→                            <td class="p-3 text-center">${formatNum(b.idd)}</td>
+  1088→  1088→                            <td class="p-3 text-right">${formatSit(r.id, b.idd)}</td>
+  1089→  1089→                        </tr>
+  1090→  1090→                        <tr class="border-b border-gray-100">
+  1091→  1091→                            <td class="p-3 font-semibold">CPC</td>
+  1092→  1092→                            <td class="p-3 text-center font-mono">${formatNum(r.cp)}</td>
+  1093→  1093→                            <td class="p-3 font-semibold">${formatConcept(r.cp)}</td>
+  1094→  1094→                            <td class="p-3 text-center">${formatNum(b.cpc)}</td>
+  1095→  1095→                            <td class="p-3 text-right">${formatSit(r.cp, b.cpc)}</td>
+  1096→  1096→                        </tr>
+  1097→  1097→                    </tbody>
+  1098→  1098→                </table>
+  1099→  1099→            </div>
+  1100→  1100→        </section>
+  1101→  1101→
+  1102→  1102→        <section class="mb-8 bg-gray-50 p-5 rounded-lg border border-gray-200">
+  1103→  1103→            <h3 class="text-md font-bold mb-3 uppercase tracking-wide">3. Entendendo a Composição das Notas</h3>
+  1104→  1104→            <p class="text-sm mb-4 text-gray-600 italic text-justify">Para fins de diagnóstico e planejamento de ações da coordenação, detalhamos abaixo o que cada indicador mede e como o CPC é composto:</p>
+  1105→  1105→            <ul class="text-sm space-y-4">
+  1106→  1106→                <li><strong>ENADE:</strong> Avalia o rendimento dos concluintes em relação aos conteúdos previstos nas diretrizes curriculares.</li>
+  1107→  1107→                <li><strong>IDD (Indicador de Diferença entre Desempenhos):</strong> Mede o "valor agregado" pelo curso ao aluno. 
+  1108→  1108→                    <div class="mt-2 bg-blue-50 p-3 border-l-4 border-blue-800 text-xs text-gray-700 rounded-r-md">
+  1109→  1109→                        <strong>Exemplo Prático:</strong> Imagine que um aluno ingressou na UEMS com uma nota baixa no ENEM (indicando base escolar frágil). Se, ao se formar, este mesmo aluno obtiver uma nota alta no ENADE, o IDD será elevado. Isso prova que a <strong>UEMS agregou conhecimento</strong> e transformou a trajetória acadêmica do estudante.
+  1110→  1110→                    </div>
+  1111→  1111→                </li>
+  1112→  1112→                <li><strong>Composição do CPC:</strong>
+  1113→  1113→                    <div class="flex flex-wrap gap-4 mt-2">
+  1114→  1114→                        <span class="bg-white border px-3 py-1 rounded-full text-xs"><strong>35%</strong> IDD</span>
+  1115→  1115→                        <span class="bg-white border px-3 py-1 rounded-full text-xs"><strong>30%</strong> Corpo Docente</span>
+  1116→  1116→                        <span class="bg-white border px-3 py-1 rounded-full text-xs"><strong>20%</strong> Nota ENADE</span>
+  1117→  1117→                        <span class="bg-white border px-3 py-1 rounded-full text-xs"><strong>15%</strong> Questionário Estudante</span>
+  1118→  1118→                    </div>
+  1119→  1119→                </li>
+  1120→  1120→            </ul>
+  1121→  1121→        </section>
+  1122→  1122→
+  1123→  1123→        <section class="mb-12 page-break">
+  1124→  1124→            <h3 class="text-md font-bold border-b-2 border-gray-100 pb-1 mb-4 uppercase tracking-wide">4. Histórico Detalhado e Parâmetros de Avaliação</h3>
+  1125→  1125→            <div class="flex flex-col gap-8">
+  1126→  1126→                <div>
+  1127→  1127→                    <h4 class="text-xs font-bold text-gray-500 mb-2 uppercase italic">Evolução das Notas (2021-2025)</h4>
+  1128→  1128→                    <div class="overflow-x-auto">
+  1129→  1129→                        <table class="w-full text-center text-sm border-collapse border border-gray-200">
+  1130→  1130→                            <thead>
+  1131→  1131→                                <tr class="bg-gray-100">
+  1132→  1132→                                    <th class="p-3 text-left border-b border-gray-300">Indicador</th>
+  1133→  1133→                                    <th class="p-2 border-b border-gray-300">2021</th>
+  1134→  1134→                                    <th class="p-2 border-b border-gray-300">2022</th>
+  1135→  1135→                                    <th class="p-2 border-b border-gray-300">2023</th>
+  1136→  1136→                                    <th class="p-2 border-b border-gray-300">2024</th>
+  1137→  1137→                                    <th class="p-2 border-b border-gray-300">2025</th>
+  1138→  1138→                                    <th class="p-2 text-right border-b border-gray-300">Variação</th>
+  1139→  1139→                                </tr>
+  1140→  1140→                            </thead>
+  1141→  1141→                            <tbody>
+  1142→  1142→                                <tr class="border-b border-gray-100">
+  1143→  1143→                                    <td class="p-3 text-left font-semibold">ENADE</td>
+  1144→  1144→                                    ${getPrintH('enade')}
+  1145→  1145→                                </tr>
+  1146→  1146→                                <tr class="border-b border-gray-100 bg-gray-50">
+  1147→  1147→                                    <td class="p-3 text-left font-semibold">IDD</td>
+  1148→  1148→                                    ${getPrintH('idd')}
+  1149→  1149→                                </tr>
+  1150→  1150→                                <tr class="border-b border-gray-100">
+  1151→  1151→                                    <td class="p-3 text-left font-semibold">CPC</td>
+  1152→  1152→                                    ${getPrintH('cpc')}
+  1153→  1153→                                </tr>
+  1154→  1154→                            </tbody>
+  1155→  1155→                        </table>
+  1156→  1156→                    </div>
+  1157→  1157→                </div>
+  1158→  1158→                
+  1159→  1159→                <div class="w-full mt-4">
+  1160→  1160→                    <h4 class="text-xs font-bold text-gray-500 mb-2 uppercase italic">Legenda Oficial (INEP)</h4>
+  1161→  1161→                    <table class="w-full text-xs border-collapse border border-gray-200">
+  1162→  1162→                        <thead>
+  1163→  1163→                            <tr class="bg-gray-50 text-gray-600">
+  1164→  1164→                                <th class="p-2 border-b text-left">Conceito</th>
+  1165→  1165→                                <th class="p-2 border-b text-right">Faixa de Nota Contínua</th>
+  1166→  1166→                            </tr>
+  1167→  1167→                        </thead>
+  1168→  1168→                        <tbody class="text-gray-700">
+  1169→  1169→                            <tr>
+  1170→  1170→                                <td class="p-2 border-b"><span class="w-2 h-2 inline-block bg-red-600 mr-2 rounded-full"></span>1 - Não atende</td>
+  1171→  1171→                                <td class="p-2 border-b text-right">0 a 0.944</td>
+  1172→  1172→                            </tr>
+  1173→  1173→                            <tr>
+  1174→  1174→                                <td class="p-2 border-b"><span class="w-2 h-2 inline-block bg-orange-500 mr-2 rounded-full"></span>2 - Insuficiente</td>
+  1175→  1175→                                <td class="p-2 border-b text-right">0.945 a 1.944</td>
+  1176→  1176→                            </tr>
+  1177→  1177→                            <tr class="bg-green-50 font-semibold text-green-800">
+  1178→  1178→                                <td class="p-2 border-b"><span class="w-2 h-2 inline-block bg-yellow-500 mr-2 rounded-full"></span>3 - Suficiente</td>
+  1179→  1179→                                <td class="p-2 border-b text-right">1.945 a 2.944</td>
+  1180→  1180→                            </tr>
+  1181→  1181→                            <tr>
+  1182→  1182→                                <td class="p-2 border-b"><span class="w-2 h-2 inline-block bg-green-500 mr-2 rounded-full"></span>4 - Bom</td>
+  1183→  1183→                                <td class="p-2 border-b text-right">2.945 a 3.944</td>
+  1184→  1184→                            </tr>
+  1185→  1185→                            <tr>
+  1186→  1186→                                <td class="p-2 border-b"><span class="w-2 h-2 inline-block bg-green-700 mr-2 rounded-full"></span>5 - Muito bom</td>
+  1187→  1187→                                <td class="p-2 border-b text-right">3.945 a 5.000</td>
+  1188→  1188→                            </tr>
+  1189→  1189→                        </tbody>
+  1190→  1190→                    </table>
+  1191→  1191→                </div>
+  1192→  1192→            </div>
+  1193→  1193→        </section>
+  1194→  1194→
+  1195→  1195→        <footer class="mt-8 pt-4 border-t border-gray-200 text-center print-only">
+  1196→  1196→            <p class="text-[10px] text-gray-400 italic">Documento gerado automaticamente pelo Portal de Indicadores de Ensino (SINAES/UEMS) para fins estritamente institucionais.</p>
+  1197→  1197→        </footer>
+  1198→  1198→      `;
+  1199→  1199→      // =======================================================
+  1200→  1200→      
+  1201→  1201→      const m = document.getElementById('courseModal'); 
+  1202→  1202→      m.classList.remove('hidden'); 
+  1203→  1203→      setTimeout(()=>m.style.opacity='1', 10);
+  1204→  1204→    }
+  1205→  1205→
+  1206→  1206→    function closeModal() { 
+  1207→  1207→        const m = document.getElementById('courseModal'); 
+  1208→  1208→        m.style.opacity='0'; 
+  1209→  1209→        setTimeout(()=>m.classList.add('hidden'), 300); 
+  1210→  1210→    }
+  1211→  1211→
+  1212→  1212→    document.addEventListener('DOMContentLoaded', initTable);
+  1213→  1213→    
+  1214→  1214→    ['filterCourse','filterGrau','filterCampus','filterStatus'].forEach(id => {
+  1215→  1215→        const el = document.getElementById(id);
+  1216→  1216→        if(el) el.addEventListener('change', renderTable);
+  1217→  1217→    });
+  1218→  1218→
+  1219→  1219→    const resetBtn = document.getElementById('resetFiltersBtn');
+  1220→  1220→    if(resetBtn) {
+  1221→  1221→        resetBtn.addEventListener('click', () => { 
+  1222→  1222→            ['filterCourse','filterGrau','filterCampus','filterStatus'].forEach(id => { 
+  1223→  1223→                const el = document.getElementById(id);
+  1224→  1224→                if(el) el.value = ''; 
+  1225→  1225→            }); 
+  1226→  1226→            renderTable(); 
+  1227→  1227→        });
+  1228→  1228→    }
+  1229→  1229→  </script>
+  1230→  1230→</body>
+  1231→  1231→</html>

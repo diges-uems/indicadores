@@ -1,0 +1,302 @@
+     1→   200→   200→         Portal de Indicadores de Ensino <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-blue-100 to-white">SINAES</span>
+     2→   201→   201→       </h1>
+     3→   202→   202→       <p class="text-blue-100 text-lg md:text-xl mt-4 font-medium max-w-xl">Monitoramento Estratégico Institucional para Gestão de Qualidade.</p>
+     4→   203→   203→      </div>
+     5→   204→   204→     </div>
+     6→   205→   205→    </div>
+     7→   206→   206→   </header>
+     8→   207→   207→
+     9→   208→   208→   <div class="max-w-7xl mx-auto px-4 sm:px-8 mb-8 animate-fade-in" style="animation-delay: 0.1s;">
+    10→   209→   209→     <div class="flex gap-8 border-b border-gray-200 overflow-x-auto no-scrollbar whitespace-nowrap">
+    11→   210→   210→       <button id="btn-tab-results" class="tab-btn active pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold" onclick="switchTab('results')">Resultados Oficiais (2021-2025)</button>
+    12→   211→   211→       <button id="btn-tab-forecast" class="tab-btn pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold" onclick="switchTab('forecast')">Previsão ENADE (2026-2028)</button>
+    13→   212→   212→     </div>
+    14→   213→   213→   </div>
+    15→   214→   214→
+    16→   215→   215→   <main class="max-w-7xl mx-auto px-4 sm:px-8 py-2">
+    17→   216→   216→    
+    18→   217→   217→    <!-- ABA 1: RESULTADOS OFICIAIS -->
+    19→   218→   218→    <div id="view-results" class="block animate-fade-in space-y-10">
+    20→   219→   219→        
+    21→   220→   220→        <!-- TOP CARDS -->
+    22→   221→   221→        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    23→   222→   222→         <!-- Média Institucional -->
+    24→   223→   223→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 flex flex-col justify-between overflow-hidden">
+    25→   224→   224→          <div>
+    26→   225→   225→           <div class="flex justify-between items-start mb-6">
+    27→   226→   226→            <div class="w-12 h-12 rounded-[1rem] bg-[#F0F5FF] text-[#2563EB] flex items-center justify-center shadow-sm">
+    28→   227→   227→                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+    29→   228→   228→            </div>
+    30→   229→   229→            <span class="bg-[#F0F5FF] text-[#2563EB] text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-blue-50">Média Oficial UEMS</span>
+    31→   230→   230→           </div>
+    32→   231→   231→           <p class="text-sm font-black text-slate-950 uppercase tracking-widest mb-4">Índice Geral de Cursos (IGC)</p>
+    33→   232→   232→           <div id="instTopBadge"></div>
+    34→   233→   233→          </div>
+    35→   234→   234→          <div class="mt-8 grid grid-cols-3 gap-2">
+    36→   235→   235→           <div class="bg-slate-50 rounded-2xl py-3 px-1 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1.5"><p class="text-xs text-slate-950 font-black uppercase tracking-widest mb-0.5">ENADE</p><div id="instEnadeBadge" class="w-full flex justify-center"></div></div>
+    37→   236→   236→           <div class="bg-slate-50 rounded-2xl py-3 px-1 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1.5"><p class="text-xs text-slate-950 font-black uppercase tracking-widest mb-0.5">IDD</p><div id="instIddBadge" class="w-full flex justify-center"></div></div>
+    38→   237→   237→           <div class="bg-slate-50 rounded-2xl py-3 px-1 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1.5"><p class="text-xs text-slate-950 font-black uppercase tracking-widest mb-0.5">CPC</p><div id="instCpcBadge" class="w-full flex justify-center"></div></div>
+    39→   238→   238→          </div>
+    40→   239→   239→         </div>
+    41→   240→   240→         
+    42→   241→   241→         <!-- CONCEITOS 4 E 5 -->
+    43→   242→   242→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 flex flex-col justify-between overflow-hidden">
+    44→   243→   243→          <div>
+    45→   244→   244→           <div class="flex justify-between items-start mb-4">
+    46→   245→   245→            <div class="w-12 h-12 rounded-[1rem] bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg></div>
+    47→   246→   246→            <span id="highlightPercentage" class="bg-[#16A34A] text-white text-lg font-black px-4 py-1.5 rounded-full shadow-lg shadow-green-100">0%</span>
+    48→   247→   247→           </div>
+    49→   248→   248→           <p class="text-sm font-black text-slate-950 uppercase tracking-widest mb-1 leading-tight">CONCEITOS 4 E 5 CPC</p>
+    50→   249→   249→           <div class="flex items-baseline gap-2"><p id="highlightCount" class="text-7xl font-black text-slate-950 tracking-tighter leading-none">0</p><p class="text-base font-semibold text-slate-950 uppercase">cursos</p></div>
+    51→   250→   250→          </div>
+    52→   251→   251→          <div class="mt-8 pt-5 border-t border-gray-100">
+    53→   252→   252→            <p class="text-xs text-slate-950 font-black uppercase mb-3 tracking-widest">Cursos na faixa</p>
+    54→   253→   253→            <div class="flex flex-wrap gap-2" id="highlightBadges"></div>
+    55→   254→   254→          </div>
+    56→   255→   255→         </div>
+    57→   256→   256→
+    58→   257→   257→         <!-- CONCEITOS 1 E 2 -->
+    59→   258→   258→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 flex flex-col justify-between overflow-hidden">
+    60→   259→   259→          <div>
+    61→   260→   260→           <div class="flex justify-between items-start mb-4">
+    62→   261→   261→            <div class="w-12 h-12 rounded-[1rem] bg-red-50 text-red-600 flex items-center justify-center shadow-inner relative"><span class="absolute top-0 right-0 flex h-3 w-3 -mt-1 -mr-1"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span></span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></div>
+    63→   262→   262→            <span id="criticalPercentage" class="bg-[#DC2626] text-white text-lg font-black px-4 py-1.5 rounded-full shadow-lg shadow-red-100">0%</span>
+    64→   263→   263→           </div>
+    65→   264→   264→           <p class="text-sm font-black text-slate-950 uppercase tracking-widest mb-1 leading-tight">CONCEITOS 1 E 2 CPC</p>
+    66→   265→   265→           <div class="flex items-baseline gap-2"><p id="criticalCount" class="text-7xl font-black text-slate-950 tracking-tighter leading-none">0</p><p class="text-base font-semibold text-slate-950 uppercase">cursos</p></div>
+    67→   266→   266→          </div>
+    68→   267→   267→          <div class="mt-8 pt-5 border-t border-gray-100">
+    69→   268→   268→            <p class="text-xs text-red-700 font-black uppercase mb-3 tracking-widest">Cursos na faixa</p>
+    70→   269→   269→            <div class="flex flex-wrap gap-2" id="criticalBadges"></div>
+    71→   270→   270→          </div>
+    72→   271→   271→         </div>
+    73→   272→   272→        </section>
+    74→   273→   273→
+    75→   274→   274→        <!-- GRÁFICO DE PIZZA ENADE -->
+    76→   275→   275→        <section class="bg-white rounded-[2.5rem] p-10 bento-shadow border border-gray-100 mb-10 flex flex-col md:flex-row items-center gap-10 overflow-hidden">
+    77→   276→   276→          <div class="w-full md:w-5/12 flex flex-col justify-center">
+    78→   277→   277→            <h2 class="text-2xl font-black text-[#00338C] uppercase tracking-tight mb-2">Desempenho ENADE</h2>
+    79→   278→   278→            <p class="text-sm text-slate-500 font-medium mb-8">Distribuição percentual dos conceitos oficiais obtidos pelos cursos na prova do ENADE.</p>
+    80→   279→   279→            <div id="enadePieLegend" class="space-y-3 w-full">
+    81→   280→   280→              <!-- Legenda preenchida via JS -->
+    82→   281→   281→            </div>
+    83→   282→   282→          </div>
+    84→   283→   283→          <div class="w-full md:w-7/12 flex justify-center items-center">
+    85→   284→   284→            <div class="relative w-72 h-72 lg:w-[26rem] lg:h-[26rem] filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.12)] transition-transform duration-500 hover:scale-105">
+    86→   285→   285→              <canvas id="enadePieChart"></canvas>
+    87→   286→   286→            </div>
+    88→   287→   287→          </div>
+    89→   288→   288→        </section>
+    90→   289→   289→
+    91→   290→   290→        <!-- GUIA RÁPIDO E FAIXA DE CONCEITO -->
+    92→   291→   291→        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10 items-stretch">
+    93→   292→   292→          <section id="section-guia" class="lg:col-span-8 bg-[#0B1428] rounded-[2rem] p-10 bento-shadow text-white border border-gray-800 flex flex-col justify-between relative group transition-transform duration-300">
+    94→   293→   293→            <button onclick="openSectionModal('content-guia', 'Entendendo os Indicadores', 'Guia Rápido SINAES', 'INFORMAÇÃO', true)" class="btn-zoom absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl bg-blue-500/20 hover:bg-blue-600 text-blue-300 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-lg border border-blue-500/30 z-10 no-print" title="Ampliar Secção">
+    95→   294→   294→                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+    96→   295→   295→            </button>
+    97→   296→   296→
+    98→   297→   297→            <div class="flex items-center gap-3 mb-10 pr-12">
+    99→   298→   298→              <div class="w-10 h-10 rounded-full bg-blue-900/40 flex items-center justify-center border border-blue-700/50 text-blue-300 font-bold italic text-xl shadow-inner shrink-0">i</div>
+   100→   299→   299→              <h2 class="text-2xl font-black text-white uppercase tracking-tight">Guia Rápido: Entendendo os Indicadores</h2>
+   101→   300→   300→            </div>
+   102→   301→   301→            
+   103→   302→   302→            <div id="content-guia" class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12 h-full">
+   104→   303→   303→              <div class="flex flex-col h-full">
+   105→   304→   304→                <h3 class="text-xl font-bold text-white mb-4 uppercase tracking-wide">CPC <span class="text-gray-500 font-medium text-xs">(Conceito Preliminar de Curso)</span></h3>
+   106→   305→   305→                <p class="text-base text-gray-400 mb-8 leading-relaxed">Nota final composta por 4 insumos principais:</p>
+   107→   306→   306→                <ul class="space-y-5 mb-10 text-base flex-1">
+   108→   307→   307→                  <li class="flex items-center gap-4"><span class="font-black text-yellow-500 w-10 shrink-0 text-lg">35%</span> <span><strong class="text-white">IDD</strong> <span class="text-gray-400 text-xs">(Valor agregado) • Fonte: ENADE</span></span></li>
+   109→   308→   308→                  <li class="flex items-start gap-4"><span class="font-black text-purple-400 w-10 shrink-0 text-lg">30%</span> <span><strong class="text-white">Corpo Docente</strong> <span class="text-gray-400 text-xs">(Formação) • Fonte: Censo da Educação Superior</span></span></li>
+   110→   309→   309→                  <li class="flex items-center gap-4"><span class="font-black text-blue-400 w-10 shrink-0 text-lg">20%</span> <span><strong class="text-white">Nota ENADE</strong> <span class="text-gray-400 text-xs">(Prova) • Fonte: ENADE</span></span></li>
+   111→   310→   310→                  <li class="flex items-center gap-4"><span class="font-black text-green-400 w-10 shrink-0 text-lg">15%</span> <span><strong class="text-white">Questionário do Estudante</strong> <span class="text-gray-400 text-xs">• Fonte: ENADE</span></span></li>
+   112→   311→   311→                </ul>
+   113→   312→   312→                <div class="bg-[#1C2438] border border-gray-700 rounded-2xl p-5 flex items-start gap-4 shadow-xl mt-auto">
+   114→   313→   313→                  <div class="mt-1 w-10 h-10 rounded-xl bg-yellow-600/20 text-yellow-500 flex items-center justify-center border border-yellow-600/30 shrink-0 shadow-inner text-xs">⚡</div>
+   115→   314→   314→                  <div>
+   116→   315→   315→                    <h4 class="text-yellow-500 font-bold text-sm uppercase tracking-widest mb-1">O Peso da Prova</h4>
+   117→   316→   316→                    <p class="text-sm text-gray-400 leading-relaxed">Os 3 insumos atrelados ao ENADE representam <strong class="text-white">70% do CPC</strong>.</p>
+   118→   317→   317→                  </div>
+   119→   318→   318→                </div>
+   120→   319→   319→              </div>
+   121→   320→   320→
+   122→   321→   321→              <div class="flex flex-col h-full">
+   123→   322→   322→                <h3 class="text-xl font-bold text-white mb-4 uppercase tracking-wide">IDD <span class="text-gray-500 font-medium text-xs">(Valor Agregado)</span></h3>
+   124→   323→   323→                <p class="text-base text-gray-400 mb-8 leading-relaxed">Mede o quanto a universidade agregou de conhecimento ao aluno:</p>
+   125→   324→   324→                <div class="bg-[#162038] border border-gray-700/50 rounded-2xl p-8 mb-8 flex items-center justify-between shadow-2xl relative">
+   126→   325→   325→                  <div class="text-center flex-1">
+   127→   326→   326→                    <p class="text-sm font-bold text-blue-300 uppercase tracking-widest mb-3">Entrada</p>
+   128→   327→   327→                    <div class="bg-[#214187] text-white font-black py-3 px-4 rounded-xl shadow-lg border border-blue-400/20 text-sm uppercase">ENEM</div>
+   129→   328→   328→                  </div>
+   130→   329→   329→                  <div class="px-6 text-blue-400"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg></div>
+   131→   330→   330→                  <div class="text-center flex-1">
+   132→   331→   331→                    <p class="text-sm font-bold text-blue-300 uppercase tracking-widest mb-3">Saída</p>
+   133→   332→   332→                    <div class="bg-[#214187] text-white font-black py-3 px-4 rounded-xl shadow-lg border border-blue-400/20 text-sm uppercase">ENADE</div>
+   134→   333→   333→                  </div>
+   135→   334→   334→                </div>
+   136→   335→   335→                <div class="bg-[#214187]/20 border border-[#214187]/50 rounded-2xl p-6 shadow-inner mt-auto">
+   137→   336→   336→                  <p class="text-base text-blue-100 leading-relaxed italic">"Se a nota final (ENADE) supera a expectativa gerada pela nota de entrada (ENEM), o curso ganha um IDD alto, puxando positivamente o CPC para cima."</p>
+   138→   337→   337→                </div>
+   139→   338→   338→              </div>
+   140→   339→   339→            </div>
+   141→   340→   340→          </section>
+   142→   341→   341→
+   143→   342→   342→          <section class="lg:col-span-4 bg-white rounded-[2rem] p-10 bento-shadow border border-gray-100 flex flex-col justify-center overflow-hidden">
+   144→   343→   343→            <h2 class="text-xs font-black text-slate-950 uppercase tracking-[0.2em] mb-10 text-center">Faixa de Conceito (NC)</h2>
+   145→   344→   344→            <div class="space-y-3.5 flex flex-col items-stretch">
+   146→   345→   345→              <div class="flex items-center gap-4 bg-[#FEF2F2] border border-[#FEE2E2] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#DC2626] text-white font-black text-xl flex items-center justify-center shadow-md">1</div><div><p class="font-bold text-[#991B1B] text-base uppercase leading-none">Não atende</p><p class="text-sm font-black text-slate-950 mt-1.5">0,000 a 0,944</p></div></div>
+   147→   346→   346→              <div class="flex items-center gap-4 bg-[#FEF2F2] border border-[#FEE2E2] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#F87171] text-white font-black text-xl flex items-center justify-center shadow-md">2</div><div><p class="font-bold text-[#991B1B] text-base uppercase leading-none">Insuficiente</p><p class="text-sm font-black text-slate-950 mt-1.5">0,945 a 1,944</p></div></div>
+   148→   347→   347→              <div class="flex items-center gap-4 bg-[#FEFCE8] border border-[#FEF08A] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#EAB308] text-slate-950 font-black text-xl flex items-center justify-center shadow-md">3</div><div><p class="font-bold text-[#B45309] text-base uppercase leading-none">Suficiente</p><p class="text-sm font-black text-slate-950 mt-1.5">1,945 a 2,944</p></div></div>
+   149→   348→   348→              <div class="flex items-center gap-4 bg-[#F0FDF4] border border-[#BBF7D0] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#4ADE80] text-slate-950 font-black text-xl flex items-center justify-center shadow-md">4</div><div><p class="font-bold text-[#15803D] text-base uppercase leading-none">Bom</p><p class="text-sm font-black text-slate-950 mt-1.5">2,945 a 3,944</p></div></div>
+   150→   349→   349→              <div class="flex items-center gap-4 bg-[#F0FDF4] border border-[#BBF7D0] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#16A34A] text-white font-black text-xl flex items-center justify-center shadow-md">5</div><div><p class="font-bold text-[#14532D] text-base uppercase leading-none">Muito bom</p><p class="text-sm font-black text-slate-950 mt-1.5">3,945 a 5,000</p></div></div>
+   151→   350→   350→            </div>
+   152→   351→   351→          </section>
+   153→   352→   352→        </div>
+   154→   353→   353→
+   155→   354→   354→        <!-- ANALYTICS SECTION -->
+   156→   355→   355→        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10 items-stretch">
+   157→   356→   356→          <section id="section-campus" class="bg-white rounded-[2.5rem] p-10 bento-shadow border border-gray-100 h-full relative group transition-transform duration-300">
+   158→   357→   357→           <button onclick="openSectionModal('content-campus', 'Qualidade por Unidade Universitária', 'Média Institucional de Notas (1 a 5)', 'GRÁFICO', false)" class="btn-zoom absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-blue-600 text-slate-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-md border border-slate-200 z-10 no-print" title="Ampliar Secção">
+   159→   358→   358→                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+   160→   359→   359→           </button>
+   161→   360→   360→
+   162→   361→   361→           <div class="mb-8 pr-12">
+   163→   362→   362→             <h3 class="text-2xl font-black text-slate-950 tracking-tight uppercase">Qualidade por Unidade Universitária</h3>
+   164→   363→   363→             <p class="text-base text-slate-950 font-black mt-1 uppercase">Média Institucional (1 a 5)</p>
+   165→   364→   364→           </div>
+   166→   365→   365→           <div class="space-y-4 pr-4" id="content-campus"></div>
+   167→   366→   366→          </section>
+   168→   367→   367→
+   169→   368→   368→          <section id="section-state" class="bg-white rounded-[2.5rem] p-10 bento-shadow border border-gray-100 h-full overflow-hidden relative group transition-transform duration-300">
+   170→   369→   369→            <button onclick="openSectionModal('content-state', 'Comparativo Estadual', 'IES Públicas do Mato Grosso do Sul', 'TABELA', false)" class="btn-zoom absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-blue-600 text-slate-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-md border border-slate-200 z-10 no-print" title="Ampliar Secção">
+   171→   370→   370→                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+   172→   371→   371→            </button>
+   173→   372→   372→
+   174→   373→   373→            <div class="mb-8 pr-12">
+   175→   374→   374→              <h3 class="text-2xl font-black text-slate-950 tracking-tight uppercase">Comparativo Estadual</h3>
+   176→   375→   375→              <p class="text-base text-slate-950 font-black mt-1 uppercase">IES Públicas de MS</p>
+   177→   376→   376→            </div>
+   178→   377→   377→            <div id="content-state" class="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 shadow-sm bg-white">
+   179→   378→   378→              <table class="w-full text-sm text-left">
+   180→   379→   379→                <thead>
+   181→   380→   380→                  <tr class="bg-slate-50 border-b border-gray-100 uppercase font-black text-sm text-slate-950 tracking-wider">
+   182→   381→   381→                    <th class="py-5 px-6">IES</th>
+   183→   382→   382→                    <th class="py-5 px-2 text-center">ENADE</th>
+   184→   383→   383→                    <th class="py-5 px-2 text-center">IDD</th>
+   185→   384→   384→                    <th class="py-5 px-2 text-center">CPC</th>
+   186→   385→   385→                    <th class="py-5 px-6 text-center">IGC</th>
+   187→   386→   386→                  </tr>
+   188→   387→   387→                </thead>
+   189→   388→   388→                <tbody id="stateComparisonBody" class="divide-y divide-slate-50">
+   190→   389→   389→                </tbody>
+   191→   390→   390→              </table>
+   192→   391→   391→            </div>
+   193→   392→   392→          </section>
+   194→   393→   393→        </div>
+   195→   394→   394→
+   196→   395→   395→        <!-- TABELA MONITORAMENTO -->
+   197→   396→   396→        <section class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 mb-10 overflow-hidden">
+   198→   397→   397→         <div class="mb-6"><h3 class="text-2xl font-black text-[#00338C] tracking-tight uppercase">Monitoramento de Cursos (2021-2025)</h3></div>
+   199→   398→   398→         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+   200→   399→   399→          <select id="filterCourse" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Curso (Todos)</option></select> 
+   201→   400→   400→          <select id="filterGrau" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Grau (Todos)</option><option value="Licenciatura">Licenciatura</option><option value="Bacharelado">Bacharelado</option><option value="Tecnológico">Tecnológico</option></select> 
+   202→   401→   401→          <select id="filterCampus" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Unidade Universitária (Todas)</option></select> 
+   203→   402→   402→          <select id="filterStatus" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Status (Todos)</option><option value="BOM">Bom / Muito bom (4-5)</option><option value="SUFICIENTE">Suficiente (3)</option><option value="INSUFICIENTE">Não atende / Insuficiente (1-2)</option></select>
+   204→   403→   403→         </div>
+   205→   404→   404→         <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+   206→   405→   405→          <p class="text-sm font-black text-slate-950 uppercase tracking-widest">Exibindo <span id="recordCount" class="text-[#00338C]">0</span> de <span id="totalRecords">0</span></p>
+   207→   406→   406→          <button id="resetFiltersBtn" class="px-5 py-2 text-sm font-black text-white bg-slate-950 hover:bg-black rounded-lg transition-colors uppercase shadow-sm">Limpar Filtros</button>
+   208→   407→   407→         </div>
+   209→   408→   408→         <div class="w-full overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
+   210→   409→   409→          <table class="w-full text-base text-left">
+   211→   410→   410→           <thead>
+   212→   411→   411→            <tr class="bg-slate-50 text-slate-950 border-b border-gray-200 uppercase font-black text-sm tracking-widest">
+   213→   412→   412→             <th class="py-5 px-6 w-[35%]">Curso</th>
+   214→   413→   413→             <th class="py-5 px-6 text-center w-[15%]">Unid. Universitária</th>
+   215→   414→   414→             <th class="text-center py-5 px-3 cursor-pointer hover:text-blue-900" onclick="window.handleSort('en')">ENADE <span id="sort-en" class="text-slate-500 text-xs">↕</span></th>
+   216→   415→   415→             <th class="text-center py-5 px-3 cursor-pointer hover:text-blue-900" onclick="window.handleSort('id')">IDD <span id="sort-id" class="text-slate-500 text-xs">↕</span></th>
+   217→   416→   416→             <th class="text-center py-5 px-3 cursor-pointer hover:text-blue-900" onclick="window.handleSort('cp')">CPC <span id="sort-cp" class="text-blue-900 text-sm font-black">↓</span></th>
+   218→   417→   417→             <th class="text-center py-5 px-6 w-[14%]">Status</th>
+   219→   418→   418→            </tr>
+   220→   419→   419→           </thead>
+   221→   420→   420→           <tbody id="allCoursesTableBody" class="divide-y divide-gray-50"></tbody>
+   222→   421→   421→          </table>
+   223→   422→   422→         </div>
+   224→   423→   423→        </section>
+   225→   424→   424→    </div>
+   226→   425→   425→
+   227→   426→   426→    <!-- ABA 2: PREVISÃO -->
+   228→   427→   427→    <div id="view-forecast" class="hidden animate-fade-in space-y-10 no-scrollbar">
+   229→   428→   428→        <div class="mb-8">
+   230→   429→   429→            <h2 class="text-3xl font-black text-[#00338C] tracking-tight uppercase">Calendário de Avaliação (2026 - 2028)</h2>
+   231→   430→   430→            <p class="text-slate-950 mt-2 font-black uppercase tracking-wide italic text-base">Ciclo Trienal INEP/CineBrasil</p>
+   232→   431→   431→        </div>
+   233→   432→   432→        
+   234→   433→   433→        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+   235→   434→   434→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-purple-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-purple-100 text-purple-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Contínuo</span><p class="text-3xl font-black text-purple-900 mt-4">Anual</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Licenciaturas e Medicina</p></div><div class="mt-8 pt-5 border-t border-purple-100 flex items-baseline gap-2"><p class="text-5xl font-black text-slate-950 tracking-tighter" id="countAnual">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+   236→   435→   435→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-blue-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-blue-100 text-blue-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Ano II</span><p class="text-3xl font-black text-[#00338C] mt-4">2026</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Naturais, Tecnologia da Informação e Comunicação e Engenharias</p></div><div class="mt-8 pt-5 border-t border-blue-100 flex items-baseline gap-2"><p class="text-5xl font-black text-slate-950 tracking-tighter" id="count2026">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+   237→   436→   436→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-emerald-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-emerald-100 text-emerald-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Ano III</span><p class="text-3xl font-black text-emerald-700 mt-4">2027</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Agrárias, Saúde e Serviços</p></div><div class="mt-8 pt-5 border-t border-emerald-100 flex items-baseline gap-2"><p class="text-4xl font-black text-slate-950 tracking-tighter" id="count2027">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+   238→   437→   437→         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-amber-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-amber-100 text-amber-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Ano I</span><p class="text-3xl font-black text-amber-800 mt-4">2028</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Sociais Aplicadas e Humanas</p></div><div class="mt-8 pt-5 border-t border-amber-100 flex items-baseline gap-2"><p class="text-5xl font-black text-slate-950 tracking-tighter" id="count2028">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+   239→   438→   438→        </section>
+   240→   439→   439→
+   241→   440→   440→        <section class="bg-white rounded-[2.5rem] p-12 bento-shadow border border-gray-100 mb-10 overflow-hidden">
+   242→   441→   441→         <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+   243→   442→   442→          <h3 class="text-xl font-black text-slate-950 tracking-tight uppercase">Lista de Cursos Previstos</h3>
+   244→   443→   443→          <select id="filterForecastYear" class="bg-slate-50 text-base font-black text-slate-950 px-5 py-3 rounded-xl border border-gray-200 outline-none uppercase cursor-pointer shadow-sm w-full md:w-auto" onchange="renderForecastTable()"><option value="">Todos os Anos</option><option value="Anual">Anual</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option></select>
+   245→   444→   444→         </div>
+   246→   445→   445→         <div class="w-full overflow-hidden rounded-3xl border border-gray-100 shadow-sm bg-white">
+   247→   446→   446→          <table class="w-full text-base text-left">
+   248→   447→   447→           <thead>
+   249→   448→   448→             <tr class="bg-slate-50 text-slate-950 border-b border-gray-200 uppercase font-black text-sm tracking-widest">
+   250→   449→   449→               <th class="py-5 px-8">Curso</th>
+   251→   450→   450→               <th class="py-5 px-6">Unidade Universitária</th>
+   252→   451→   451→               <th class="py-5 px-6">Área (CineBrasil)</th>
+   253→   452→   452→               <th class="text-center py-5 px-8">Ano Previsto</th>
+   254→   453→   453→             </tr>
+   255→   454→   454→           </thead>
+   256→   455→   455→           <tbody id="forecastTableBody" class="divide-y divide-gray-50"></tbody>
+   257→   456→   456→          </table>
+   258→   457→   457→         </div>
+   259→   458→   458→        </section>
+   260→   459→   459→    </div>
+   261→   460→   460→   </main>
+   262→   461→   461→
+   263→   462→   462→   <footer class="py-12 max-w-7xl mx-auto px-4 border-t border-gray-200 text-center">
+   264→   463→   463→    <span class="text-base text-[#00338C] font-black uppercase tracking-widest">© 2026 UEMS</span>
+   265→   464→   464→   </footer>
+   266→   465→   465→  </div>
+   267→   466→   466→
+   268→   467→   467→  <!-- MODAL GENÉRICO (POPUP DAS SEÇÕES - AMPLIAÇÃO) -->
+   269→   468→   468→  <div id="genericModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center z-50 p-2 md:p-4 transition-opacity duration-300">
+   270→   469→   469→   <div class="bg-white rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-slate-300 w-full max-w-5xl">
+   271→   470→   470→    <div class="p-5 border-b border-gray-200 flex items-center justify-between bg-slate-100 z-10 shadow-sm">
+   272→   471→   471→     <div>
+   273→   472→   472→      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-blue-100 text-blue-800 text-xs font-black uppercase tracking-widest mb-2 shadow-sm border border-blue-200" id="genericModalBadge">DETALHE</div>
+   274→   473→   473→      <h2 id="genericModalTitle" class="text-3xl font-black text-gray-900 tracking-tight leading-tight">Título da Seção</h2>
+   275→   474→   474→      <p id="genericModalSubtitle" class="text-slate-700 font-black mt-1 uppercase text-sm tracking-widest">Subtítulo</p>
+   276→   475→   475→     </div>
+   277→   476→   476→     <button onclick="closeGenericModal()" class="w-14 h-14 bg-white rounded-full flex items-center justify-center text-red-600 hover:bg-red-50 hover:text-red-700 border-2 border-red-100 shadow-sm transition-transform hover:rotate-90 shrink-0"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg></button>
+   278→   477→   477→    </div>
+   279→   478→   478→    <!-- O conteúdo clonado entra aqui, com SCROLL ativo -->
+   280→   479→   479→    <div class="flex-1 bg-slate-50 relative" id="genericModalContent"></div>
+   281→   480→   480→   </div>
+   282→   481→   481→  </div>
+   283→   482→   482→
+   284→   483→   483→  <!-- MODAL DETALHE DO CURSO (TELA DE VISUALIZAÇÃO - SISTEMA) -->
+   285→   484→   484→  <div id="courseModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center z-50 p-2 md:p-4 transition-opacity duration-300">
+   286→   485→   485→   <div class="bg-white rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-slate-300 w-full max-w-4xl">
+   287→   486→   486→    <div class="p-5 border-b border-gray-200 flex items-center justify-between bg-slate-100 z-10 shadow-sm no-print">
+   288→   487→   487→     <div>
+   289→   488→   488→      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-blue-100 text-blue-800 text-xs font-black uppercase tracking-widest mb-2 shadow-sm border border-blue-200" id="modalCourseCodeBadge">CÓD: 000000</div>
+   290→   489→   489→      <h2 id="modalCourseTitle" class="text-3xl font-black text-gray-900 tracking-tight leading-tight">Nome do Curso</h2>
+   291→   490→   490→      <p id="modalCourseSubtitle" class="text-slate-700 font-black mt-1 uppercase text-sm tracking-widest"></p>
+   292→   491→   491→     </div>
+   293→   492→   492→     <div class="flex items-center gap-3 no-print">
+   294→   493→   493→      <button onclick="window.print()" class="w-14 h-14 bg-white rounded-full flex items-center justify-center text-[#00338C] hover:bg-blue-50 hover:text-blue-800 border-2 border-blue-100 shadow-sm transition-transform hover:scale-105 shrink-0" title="Gerar Relatório em PDF"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg></button>
+   295→   494→   494→      <button onclick="closeModal()" class="w-14 h-14 bg-white rounded-full flex items-center justify-center text-red-600 hover:bg-red-50 hover:text-red-700 border-2 border-red-100 shadow-sm transition-transform hover:rotate-90 shrink-0"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg></button>
+   296→   495→   495→     </div>
+   297→   496→   496→    </div>
+   298→   497→   497→    <!-- O conteúdo visual do Modal em Tela -->
+   299→   498→   498→    <div class="flex-1 bg-slate-50 relative" id="modalContent"></div>
+   300→   499→   499→   </div>
+
+[showing lines 1-300 of 302; use offset=301 with limit to continue reading]

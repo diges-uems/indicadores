@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full no-scrollbar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Indicadores de Ensino (SINAES/UEMS)</title>
+  <meta name="theme-color" content="#00338C">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = { 
+      theme: { 
+        extend: { 
+          fontFamily: { sans: ['Inter', 'sans-serif'] }, 
+          colors: { 
+            'sinaes-dark': '#0B1428', 
+            'sinaes-card': '#162038', 
+            'sinaes-blue': '#214187', 
+            'sinaes-yellow': '#EAB308' 
+          } 
+        } 
+      } 
+    }
+  </script>
+  <style>
+    * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+    html, body { height: 100%; background-color: #f8fafc; overflow-x: hidden; scroll-behavior: smooth; }
+    
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .fixed-bg-texture { position: fixed; inset: 0; z-index: -1; background: radial-gradient(#e5e7eb 1px, transparent 1px); background-size: 16px 16px; opacity: 0.5; pointer-events: none; }
+    .bento-shadow { box-shadow: 0 24px 60px -10px rgba(0, 34, 85, 0.08); }
+    
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+    .bar-animate { animation: growBar 1s ease-out forwards; transform-origin: left; }
+    @keyframes growBar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    
+    .tab-btn { position: relative; transition: all 0.3s ease; cursor: pointer; }
+    .tab-btn::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 100%; height: 3px; background-color: transparent; transition: all 0.3s ease; border-radius: 3px 3px 0 0; }
+    .tab-btn.active { color: #00338C; font-weight: 800; }
+    .tab-btn.active::after { background-color: #00338C; }
+
+    /* ========================================================
+       MODAIS MAXIMIZADOS (TELA)
+       ======================================================== */
+    #genericModal > div, #courseModal > div {
+        width: 98vw !important;
+        max-width: 1800px !important;
+        height: 96vh !important;
+        max-height: 96vh !important;
+    }
+    
+    #genericModal > div > div:first-child, #courseModal > div > div:first-child {
+        padding: 1.5rem 3rem !important;
+    }
+
+    #genericModalContent, #modalContent {
+        display: block !important; 
+        overflow-y: auto !important; 
+        overflow-x: hidden !important;
+        padding: 2rem 3rem !important;
+        height: auto !important;
+    }
+    
+    #genericModalContent *, #modalContent * { flex-shrink: 0 !important; }
+    #genericModalContent .h-full, #modalContent .h-full,
+    #genericModalContent .min-h-full, #modalContent .min-h-full { height: auto !important; min-height: min-content !important; }
+
+    #modalContent .text-slate-500, #genericModalContent .text-slate-500,
+    #modalContent .text-slate-400, #genericModalContent .text-slate-400 { color: #0f172a !important; font-weight: 900 !important; }
+    #modalContent .text-slate-900, #genericModalContent .text-slate-900,
+    #modalContent .text-slate-950, #genericModalContent .text-slate-950 { color: #000000 !important; }
+
+    #genericModalContent .min-w-[40px], #modalContent .min-w-[40px] { min-width: 60px !important; font-size: 1.8rem !important; padding: 0.8rem !important; }
+    #genericModalContent .min-w-[64px], #modalContent .min-w-[64px] { min-width: 100px !important; font-size: 1.8rem !important; padding: 0.8rem !important; }
+    #genericModalContent .min-w-[32px], #modalContent .min-w-[32px] { min-width: 56px !important; font-size: 1.6rem !important; padding: 0.6rem !important; }
+    #genericModalContent .min-w-[50px], #modalContent .min-w-[50px] { min-width: 90px !important; font-size: 1.6rem !important; padding: 0.6rem !important; }
+
+    /* Modal Curso */
+    #modalContent { display: flex !important; flex-direction: column; gap: 2rem; }
+    #modalContent h3 { font-size: 1.8rem !important; margin-bottom: 1.5rem !important; }
+    #modalContent .text-[9px] { font-size: 1.2rem !important; line-height: 1.4rem !important; }
+    #modalContent .text-[10px] { font-size: 1.4rem !important; line-height: 1.6rem !important; }
+    #modalContent .text-xs { font-size: 1.6rem !important; line-height: 1.8rem !important; }
+    #modalContent .text-sm { font-size: 1.8rem !important; line-height: 2.1rem !important; }
+    #modalContent .text-4xl { font-size: 4.5rem !important; line-height: 1 !important; }
+    #modalContent .mb-12 { margin-bottom: 2rem !important; }
+    #modalContent .p-6 { padding: 1.5rem 2rem !important; }
+    
+    #modalContent .history-wrapper { overflow-x: auto !important; overflow-y: visible !important; height: auto !important; display: block !important; margin-bottom: 2rem !important; }
+    #modalContent table { height: auto !important; margin: 0 !important; width: 100% !important; min-width: 800px !important; }
+    #modalContent th, #modalContent td { padding: 1.5rem !important; font-size: 1.6rem !important; }
+    #modalContent .w-10.h-10 { width: 5.5rem !important; height: 5.5rem !important; font-size: 3rem !important; }
+
+    /* Modais Genéricos */
+    #content-guia { display: flex !important; flex-direction: column !important; gap: 4rem !important; } 
+    #genericModalContent .mb-10 { margin-bottom: 1.5rem !important; }
+    #genericModalContent .mb-8 { margin-bottom: 1rem !important; }
+    #genericModalContent .gap-y-12 { row-gap: 3.5rem !important; } 
+    #genericModalContent .space-y-5 > * + * { margin-top: 2.5rem !important; }
+    #genericModalContent li span.w-10 { width: 8rem !important; font-size: 2.4rem !important; }
+    #genericModalContent .w-10.h-10 { width: 6rem !important; height: 6rem !important; font-size: 2.5rem !important; }
+    #genericModalContent h3.text-xl { font-size: 2.4rem !important; margin-bottom: 1.5rem !important; line-height: 1.3 !important; }
+    #genericModalContent p.text-base { font-size: 1.8rem !important; margin-bottom: 1.5rem !important; line-height: 1.5 !important; }
+    #genericModalContent li { font-size: 1.8rem !important; margin-bottom: 1rem !important; line-height: 1.4 !important; }
+    #genericModalContent table { height: auto; width: 100%; min-width: 800px !important; } 
+    #genericModalContent th, #genericModalContent td { padding: 1.7rem !important; font-size: 1.8rem !important; }
+    
+    #genericModalContent #content-campus > div { display: flex !important; flex-direction: column !important; align-items: flex-start !important; width: 100% !important; margin-bottom: 3.5rem !important; gap: 1rem !important; }
+    #genericModalContent #content-campus .w-40 { width: 100% !important; text-align: left !important; } 
+    #genericModalContent #content-campus .truncate { white-space: normal !important; overflow: visible !important; }
+    #genericModalContent .text-sm { font-size: 1.8rem !important; line-height: 2.2rem !important; }
+    #genericModalContent .text-xs { font-size: 1.4rem !important; line-height: 1.8rem !important; }
+    #genericModalContent p.text-xs { margin-top: 0.25rem !important; }
+    #genericModalContent .h-8 { height: 5rem !important; border-radius: 9999px !important; width: 100% !important; }
+    #genericModalContent .bg-gradient-to-r { border-radius: 9999px !important; height: 100% !important; }
+    #genericModalContent .bg-gradient-to-r span { font-size: 2.2rem !important; line-height: 1 !important; display: flex; align-items: center; padding-right: 1.5rem; height: 100% !important; }
+    #genericModalContent .space-y-4 > * + * { margin-top: 2rem !important; }
+
+    .modal-white-override { background-color: #ffffff !important; }
+    .modal-white-override * { color: #0f172a !important; border-color: #cbd5e1 !important; }
+    .modal-white-override .text-gray-400 { color: #475569 !important; font-weight: 700 !important; }
+    .modal-white-override .text-gray-500 { color: #64748b !important; }
+    .modal-white-override .bg-\[\#1C2438\], .modal-white-override .bg-\[\#162038\] { background-color: #f8fafc !important; border: 1px solid #e2e8f0 !important; box-shadow: none !important; }
+    .modal-white-override .bg-\[\#214187\]\/20 { background-color: #eff6ff !important; border-color: #bfdbfe !important; }
+    .modal-white-override .bg-\[\#214187\] { background-color: #e2e8f0 !important; color: #0f172a !important; }
+    .modal-white-override .text-yellow-500 { color: #b45309 !important; }
+    .modal-white-override .text-purple-400 { color: #6d28d9 !important; }
+    .modal-white-override .text-blue-400, .modal-white-override .text-blue-300 { color: #00338C !important; }
+    .modal-white-override .text-green-400 { color: #15803d !important; }
+    .modal-white-override svg { stroke: #0f172a !important; }
+
+    /* ========================================================
+       MODO IMPRESSÃO (RELATÓRIO PDF INSTITUCIONAL)
+       ======================================================== */
+    /* Classes de estilo específicas do documento de impressão */
+    .uems-blue { color: #003366; }
+    .bg-uems-blue { background-color: #003366; }
+    .table-zebra tr:nth-child(even) { background-color: #f9fafb; }
+    
+    @media screen {
+        #printArea { display: none !important; }
+    }
+       
+    @media print {
+        @page { margin: 0; size: A4 portrait; }
+        
+        /* Limpa o body para o papel branco */
+        body { background-color: #ffffff !important; overflow: visible !important; margin: 0 !important; padding: 0 !important; }
+        
+        /* Esconde tudo o que for da tela do sistema */
+        .fixed-bg-texture, #main-wrapper, #genericModal, #courseModal, .no-print { 
+            display: none !important; 
+        }
+
+        /* Mostra e formata o Espelho de Impressão A4 */
+        #printArea { 
+            display: block !important; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.5;
+            width: 100%;
+            margin: 0;
+            padding: 1.5cm; /* Margem interna recriada para não colar na borda do papel */
+            box-sizing: border-box;
+        }
+
+        /* Utilitários de quebra de página */
+        .page-break { page-break-after: always; }
+        .break-inside-avoid, table, tr, td, th {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+
+        /* Garante fidelidade das cores na impressão PDF */
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+    }
+  </style>
+</head>
+<body class="h-full overflow-x-hidden no-scrollbar relative font-sans antialiased text-slate-950 bg-slate-50 transition-colors duration-300">
+  <div class="fixed-bg-texture"></div>
+  
+  <div id="main-wrapper" class="min-h-full w-full transition-all duration-500">
+   
+   <header class="relative w-full max-w-7xl mx-auto mt-6 px-4 sm:px-8 mb-6 animate-fade-in">
+    <div class="relative w-full min-h-[350px] rounded-[2rem] overflow-hidden shadow-2xl shadow-blue-900/10">
+     <img src="https://www.uems.br/anexos/imagens/conteudo/uems_imagens_2023-09-22_13-02-19.png" alt="Fachada principal UEMS" class="absolute inset-0 w-full h-full object-cover object-center" onerror="this.style.background='#00338C';">
+     <div class="absolute inset-0 bg-gradient-to-r from-[#002255]/95 via-[#00338c]/60 to-transparent"></div>
+     <div class="absolute inset-0 flex flex-col md:flex-row items-start md:items-end justify-between p-10 md:p-14 z-10 pb-10">
+      <div>
+       <h1 class="text-4xl md:text-5xl font-black tracking-tight text-white leading-tight max-w-2xl">
+         Portal de Indicadores de Ensino <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-blue-100 to-white">SINAES</span>
+       </h1>
+       <p class="text-blue-100 text-lg md:text-xl mt-4 font-medium max-w-xl">Monitoramento Estratégico Institucional para Gestão de Qualidade.</p>
+      </div>
+     </div>
+    </div>
+   </header>
+
+   <div class="max-w-7xl mx-auto px-4 sm:px-8 mb-8 animate-fade-in" style="animation-delay: 0.1s;">
+     <div class="flex gap-8 border-b border-gray-200 overflow-x-auto no-scrollbar whitespace-nowrap">
+       <button id="btn-tab-results" class="tab-btn active pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold" onclick="switchTab('results')">Resultados Oficiais (2021-2025)</button>
+       <button id="btn-tab-forecast" class="tab-btn pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold" onclick="switchTab('forecast')">Previsão ENADE (2026-2028)</button>
+     </div>
+   </div>
+
+   <main class="max-w-7xl mx-auto px-4 sm:px-8 py-2">
+    
+    <!-- ABA 1: RESULTADOS OFICIAIS -->
+    <div id="view-results" class="block animate-fade-in space-y-10">
+        
+        <!-- TOP CARDS -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+         <!-- Média Institucional -->
+         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 flex flex-col justify-between overflow-hidden">
+          <div>
+           <div class="flex justify-between items-start mb-6">
+            <div class="w-12 h-12 rounded-[1rem] bg-[#F0F5FF] text-[#2563EB] flex items-center justify-center shadow-sm">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+            </div>
+            <span class="bg-[#F0F5FF] text-[#2563EB] text-xs font-black px-4 py-1.5 rounded-full uppercase tracking-widest border border-blue-50">Média Oficial UEMS</span>
+           </div>
+           <p class="text-sm font-black text-slate-950 uppercase tracking-widest mb-4">Índice Geral de Cursos (IGC)</p>
+           <div id="instTopBadge"></div>
+          </div>
+          <div class="mt-8 grid grid-cols-3 gap-2">
+           <div class="bg-slate-50 rounded-2xl py-3 px-1 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1.5"><p class="text-xs text-slate-950 font-black uppercase tracking-widest mb-0.5">ENADE</p><div id="instEnadeBadge" class="w-full flex justify-center"></div></div>
+           <div class="bg-slate-50 rounded-2xl py-3 px-1 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1.5"><p class="text-xs text-slate-950 font-black uppercase tracking-widest mb-0.5">IDD</p><div id="instIddBadge" class="w-full flex justify-center"></div></div>
+           <div class="bg-slate-50 rounded-2xl py-3 px-1 text-center border border-gray-100 shadow-sm flex flex-col items-center justify-center gap-1.5"><p class="text-xs text-slate-950 font-black uppercase tracking-widest mb-0.5">CPC</p><div id="instCpcBadge" class="w-full flex justify-center"></div></div>
+          </div>
+         </div>
+         
+         <!-- CONCEITOS 4 E 5 -->
+         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 flex flex-col justify-between overflow-hidden">
+          <div>
+           <div class="flex justify-between items-start mb-4">
+            <div class="w-12 h-12 rounded-[1rem] bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg></div>
+            <span id="highlightPercentage" class="bg-[#16A34A] text-white text-lg font-black px-4 py-1.5 rounded-full shadow-lg shadow-green-100">0%</span>
+           </div>
+           <p class="text-sm font-black text-slate-950 uppercase tracking-widest mb-1 leading-tight">CONCEITOS 4 E 5 CPC</p>
+           <div class="flex items-baseline gap-2"><p id="highlightCount" class="text-7xl font-black text-slate-950 tracking-tighter leading-none">0</p><p class="text-base font-semibold text-slate-950 uppercase">cursos</p></div>
+          </div>
+          <div class="mt-8 pt-5 border-t border-gray-100">
+            <p class="text-xs text-slate-950 font-black uppercase mb-3 tracking-widest">Cursos na faixa</p>
+            <div class="flex flex-wrap gap-2" id="highlightBadges"></div>
+          </div>
+         </div>
+
+         <!-- CONCEITOS 1 E 2 -->
+         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 flex flex-col justify-between overflow-hidden">
+          <div>
+           <div class="flex justify-between items-start mb-4">
+            <div class="w-12 h-12 rounded-[1rem] bg-red-50 text-red-600 flex items-center justify-center shadow-inner relative"><span class="absolute top-0 right-0 flex h-3 w-3 -mt-1 -mr-1"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span></span><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg></div>
+            <span id="criticalPercentage" class="bg-[#DC2626] text-white text-lg font-black px-4 py-1.5 rounded-full shadow-lg shadow-red-100">0%</span>
+           </div>
+           <p class="text-sm font-black text-slate-950 uppercase tracking-widest mb-1 leading-tight">CONCEITOS 1 E 2 CPC</p>
+           <div class="flex items-baseline gap-2"><p id="criticalCount" class="text-7xl font-black text-slate-950 tracking-tighter leading-none">0</p><p class="text-base font-semibold text-slate-950 uppercase">cursos</p></div>
+          </div>
+          <div class="mt-8 pt-5 border-t border-gray-100">
+            <p class="text-xs text-red-700 font-black uppercase mb-3 tracking-widest">Cursos na faixa</p>
+            <div class="flex flex-wrap gap-2" id="criticalBadges"></div>
+          </div>
+         </div>
+        </section>
+
+        <!-- GRÁFICO DE PIZZA ENADE -->
+        <section class="bg-white rounded-[2.5rem] p-10 bento-shadow border border-gray-100 mb-10 flex flex-col md:flex-row items-center gap-10 overflow-hidden">
+          <div class="w-full md:w-5/12 flex flex-col justify-center">
+            <h2 class="text-2xl font-black text-[#00338C] uppercase tracking-tight mb-2">Desempenho ENADE</h2>
+            <p class="text-sm text-slate-500 font-medium mb-8">Distribuição percentual dos conceitos oficiais obtidos pelos cursos na prova do ENADE.</p>
+            <div id="enadePieLegend" class="space-y-3 w-full">
+              <!-- Legenda preenchida via JS -->
+            </div>
+          </div>
+          <div class="w-full md:w-7/12 flex justify-center items-center">
+            <div class="relative w-72 h-72 lg:w-[26rem] lg:h-[26rem] filter drop-shadow-[0_20px_30px_rgba(0,0,0,0.12)] transition-transform duration-500 hover:scale-105">
+              <canvas id="enadePieChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- GUIA RÁPIDO E FAIXA DE CONCEITO -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10 items-stretch">
+          <section id="section-guia" class="lg:col-span-8 bg-[#0B1428] rounded-[2rem] p-10 bento-shadow text-white border border-gray-800 flex flex-col justify-between relative group transition-transform duration-300">
+            <button onclick="openSectionModal('content-guia', 'Entendendo os Indicadores', 'Guia Rápido SINAES', 'INFORMAÇÃO', true)" class="btn-zoom absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl bg-blue-500/20 hover:bg-blue-600 text-blue-300 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-lg border border-blue-500/30 z-10 no-print" title="Ampliar Secção">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+            </button>
+
+            <div class="flex items-center gap-3 mb-10 pr-12">
+              <div class="w-10 h-10 rounded-full bg-blue-900/40 flex items-center justify-center border border-blue-700/50 text-blue-300 font-bold italic text-xl shadow-inner shrink-0">i</div>
+              <h2 class="text-2xl font-black text-white uppercase tracking-tight">Guia Rápido: Entendendo os Indicadores</h2>
+            </div>
+            
+            <div id="content-guia" class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12 h-full">
+              <div class="flex flex-col h-full">
+                <h3 class="text-xl font-bold text-white mb-4 uppercase tracking-wide">CPC <span class="text-gray-500 font-medium text-xs">(Conceito Preliminar de Curso)</span></h3>
+                <p class="text-base text-gray-400 mb-8 leading-relaxed">Nota final composta por 4 insumos principais:</p>
+                <ul class="space-y-5 mb-10 text-base flex-1">
+                  <li class="flex items-center gap-4"><span class="font-black text-yellow-500 w-10 shrink-0 text-lg">35%</span> <span><strong class="text-white">IDD</strong> <span class="text-gray-400 text-xs">(Valor agregado) • Fonte: ENADE</span></span></li>
+                  <li class="flex items-start gap-4"><span class="font-black text-purple-400 w-10 shrink-0 text-lg">30%</span> <span><strong class="text-white">Corpo Docente</strong> <span class="text-gray-400 text-xs">(Formação) • Fonte: Censo da Educação Superior</span></span></li>
+                  <li class="flex items-center gap-4"><span class="font-black text-blue-400 w-10 shrink-0 text-lg">20%</span> <span><strong class="text-white">Nota ENADE</strong> <span class="text-gray-400 text-xs">(Prova) • Fonte: ENADE</span></span></li>
+                  <li class="flex items-center gap-4"><span class="font-black text-green-400 w-10 shrink-0 text-lg">15%</span> <span><strong class="text-white">Questionário do Estudante</strong> <span class="text-gray-400 text-xs">• Fonte: ENADE</span></span></li>
+                </ul>
+                <div class="bg-[#1C2438] border border-gray-700 rounded-2xl p-5 flex items-start gap-4 shadow-xl mt-auto">
+                  <div class="mt-1 w-10 h-10 rounded-xl bg-yellow-600/20 text-yellow-500 flex items-center justify-center border border-yellow-600/30 shrink-0 shadow-inner text-xs">⚡</div>
+                  <div>
+                    <h4 class="text-yellow-500 font-bold text-sm uppercase tracking-widest mb-1">O Peso da Prova</h4>
+                    <p class="text-sm text-gray-400 leading-relaxed">Os 3 insumos atrelados ao ENADE representam <strong class="text-white">70% do CPC</strong>.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex flex-col h-full">
+                <h3 class="text-xl font-bold text-white mb-4 uppercase tracking-wide">IDD <span class="text-gray-500 font-medium text-xs">(Valor Agregado)</span></h3>
+                <p class="text-base text-gray-400 mb-8 leading-relaxed">Mede o quanto a universidade agregou de conhecimento ao aluno:</p>
+                <div class="bg-[#162038] border border-gray-700/50 rounded-2xl p-8 mb-8 flex items-center justify-between shadow-2xl relative">
+                  <div class="text-center flex-1">
+                    <p class="text-sm font-bold text-blue-300 uppercase tracking-widest mb-3">Entrada</p>
+                    <div class="bg-[#214187] text-white font-black py-3 px-4 rounded-xl shadow-lg border border-blue-400/20 text-sm uppercase">ENEM</div>
+                  </div>
+                  <div class="px-6 text-blue-400"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg></div>
+                  <div class="text-center flex-1">
+                    <p class="text-sm font-bold text-blue-300 uppercase tracking-widest mb-3">Saída</p>
+                    <div class="bg-[#214187] text-white font-black py-3 px-4 rounded-xl shadow-lg border border-blue-400/20 text-sm uppercase">ENADE</div>
+                  </div>
+                </div>
+                <div class="bg-[#214187]/20 border border-[#214187]/50 rounded-2xl p-6 shadow-inner mt-auto">
+                  <p class="text-base text-blue-100 leading-relaxed italic">"Se a nota final (ENADE) supera a expectativa gerada pela nota de entrada (ENEM), o curso ganha um IDD alto, puxando positivamente o CPC para cima."</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="lg:col-span-4 bg-white rounded-[2rem] p-10 bento-shadow border border-gray-100 flex flex-col justify-center overflow-hidden">
+            <h2 class="text-xs font-black text-slate-950 uppercase tracking-[0.2em] mb-10 text-center">Faixa de Conceito (NC)</h2>
+            <div class="space-y-3.5 flex flex-col items-stretch">
+              <div class="flex items-center gap-4 bg-[#FEF2F2] border border-[#FEE2E2] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#DC2626] text-white font-black text-xl flex items-center justify-center shadow-md">1</div><div><p class="font-bold text-[#991B1B] text-base uppercase leading-none">Não atende</p><p class="text-sm font-black text-slate-950 mt-1.5">0,000 a 0,944</p></div></div>
+              <div class="flex items-center gap-4 bg-[#FEF2F2] border border-[#FEE2E2] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#F87171] text-white font-black text-xl flex items-center justify-center shadow-md">2</div><div><p class="font-bold text-[#991B1B] text-base uppercase leading-none">Insuficiente</p><p class="text-sm font-black text-slate-950 mt-1.5">0,945 a 1,944</p></div></div>
+              <div class="flex items-center gap-4 bg-[#FEFCE8] border border-[#FEF08A] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#EAB308] text-slate-950 font-black text-xl flex items-center justify-center shadow-md">3</div><div><p class="font-bold text-[#B45309] text-base uppercase leading-none">Suficiente</p><p class="text-sm font-black text-slate-950 mt-1.5">1,945 a 2,944</p></div></div>
+              <div class="flex items-center gap-4 bg-[#F0FDF4] border border-[#BBF7D0] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#4ADE80] text-slate-950 font-black text-xl flex items-center justify-center shadow-md">4</div><div><p class="font-bold text-[#15803D] text-base uppercase leading-none">Bom</p><p class="text-sm font-black text-slate-950 mt-1.5">2,945 a 3,944</p></div></div>
+              <div class="flex items-center gap-4 bg-[#F0FDF4] border border-[#BBF7D0] p-4 rounded-2xl shadow-sm"><div class="w-12 h-12 shrink-0 rounded-xl bg-[#16A34A] text-white font-black text-xl flex items-center justify-center shadow-md">5</div><div><p class="font-bold text-[#14532D] text-base uppercase leading-none">Muito bom</p><p class="text-sm font-black text-slate-950 mt-1.5">3,945 a 5,000</p></div></div>
+            </div>
+          </section>
+        </div>
+
+        <!-- ANALYTICS SECTION -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10 items-stretch">
+          <section id="section-campus" class="bg-white rounded-[2.5rem] p-10 bento-shadow border border-gray-100 h-full relative group transition-transform duration-300">
+           <button onclick="openSectionModal('content-campus', 'Qualidade por Unidade Universitária', 'Média Institucional de Notas (1 a 5)', 'GRÁFICO', false)" class="btn-zoom absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-blue-600 text-slate-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-md border border-slate-200 z-10 no-print" title="Ampliar Secção">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+           </button>
+
+           <div class="mb-8 pr-12">
+             <h3 class="text-2xl font-black text-slate-950 tracking-tight uppercase">Qualidade por Unidade Universitária</h3>
+             <p class="text-base text-slate-950 font-black mt-1 uppercase">Média Institucional (1 a 5)</p>
+           </div>
+           <div class="space-y-4 pr-4" id="content-campus"></div>
+          </section>
+
+          <section id="section-state" class="bg-white rounded-[2.5rem] p-10 bento-shadow border border-gray-100 h-full overflow-hidden relative group transition-transform duration-300">
+            <button onclick="openSectionModal('content-state', 'Comparativo Estadual', 'IES Públicas do Mato Grosso do Sul', 'TABELA', false)" class="btn-zoom absolute top-6 right-6 w-12 h-12 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-blue-600 text-slate-500 hover:text-white transition-all opacity-0 group-hover:opacity-100 shadow-md border border-slate-200 z-10 no-print" title="Ampliar Secção">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+            </button>
+
+            <div class="mb-8 pr-12">
+              <h3 class="text-2xl font-black text-slate-950 tracking-tight uppercase">Comparativo Estadual</h3>
+              <p class="text-base text-slate-950 font-black mt-1 uppercase">IES Públicas de MS</p>
+            </div>
+            <div id="content-state" class="w-full overflow-hidden rounded-[1.5rem] border border-gray-100 shadow-sm bg-white">
+              <table class="w-full text-sm text-left">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-gray-100 uppercase font-black text-sm text-slate-950 tracking-wider">
+                    <th class="py-5 px-6">IES</th>
+                    <th class="py-5 px-2 text-center">ENADE</th>
+                    <th class="py-5 px-2 text-center">IDD</th>
+                    <th class="py-5 px-2 text-center">CPC</th>
+                    <th class="py-5 px-6 text-center">IGC</th>
+                  </tr>
+                </thead>
+                <tbody id="stateComparisonBody" class="divide-y divide-slate-50">
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- TABELA MONITORAMENTO -->
+        <section class="bg-white rounded-[2rem] p-8 bento-shadow border border-gray-100 mb-10 overflow-hidden">
+         <div class="mb-6"><h3 class="text-2xl font-black text-[#00338C] tracking-tight uppercase">Monitoramento de Cursos (2021-2025)</h3></div>
+         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <select id="filterCourse" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Curso (Todos)</option></select> 
+          <select id="filterGrau" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Grau (Todos)</option><option value="Licenciatura">Licenciatura</option><option value="Bacharelado">Bacharelado</option><option value="Tecnológico">Tecnológico</option></select> 
+          <select id="filterCampus" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Unidade Universitária (Todas)</option></select> 
+          <select id="filterStatus" class="bg-slate-50 text-base font-black text-slate-950 px-4 py-3 rounded-xl border border-gray-200 outline-none cursor-pointer uppercase shadow-sm"><option value="">Status (Todos)</option><option value="BOM">Bom / Muito bom (4-5)</option><option value="SUFICIENTE">Suficiente (3)</option><option value="INSUFICIENTE">Não atende / Insuficiente (1-2)</option></select>
+         </div>
+         <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+          <p class="text-sm font-black text-slate-950 uppercase tracking-widest">Exibindo <span id="recordCount" class="text-[#00338C]">0</span> de <span id="totalRecords">0</span></p>
+          <button id="resetFiltersBtn" class="px-5 py-2 text-sm font-black text-white bg-slate-950 hover:bg-black rounded-lg transition-colors uppercase shadow-sm">Limpar Filtros</button>
+         </div>
+         <div class="w-full overflow-hidden rounded-xl border border-gray-200 shadow-sm bg-white">
+          <table class="w-full text-base text-left">
+           <thead>
+            <tr class="bg-slate-50 text-slate-950 border-b border-gray-200 uppercase font-black text-sm tracking-widest">
+             <th class="py-5 px-6 w-[35%]">Curso</th>
+             <th class="py-5 px-6 text-center w-[15%]">Unid. Universitária</th>
+             <th class="text-center py-5 px-3 cursor-pointer hover:text-blue-900" onclick="window.handleSort('en')">ENADE <span id="sort-en" class="text-slate-500 text-xs">↕</span></th>
+             <th class="text-center py-5 px-3 cursor-pointer hover:text-blue-900" onclick="window.handleSort('id')">IDD <span id="sort-id" class="text-slate-500 text-xs">↕</span></th>
+             <th class="text-center py-5 px-3 cursor-pointer hover:text-blue-900" onclick="window.handleSort('cp')">CPC <span id="sort-cp" class="text-blue-900 text-sm font-black">↓</span></th>
+             <th class="text-center py-5 px-6 w-[14%]">Status</th>
+            </tr>
+           </thead>
+           <tbody id="allCoursesTableBody" class="divide-y divide-gray-50"></tbody>
+          </table>
+         </div>
+        </section>
+    </div>
+
+    <!-- ABA 2: PREVISÃO -->
+    <div id="view-forecast" class="hidden animate-fade-in space-y-10 no-scrollbar">
+        <div class="mb-8">
+            <h2 class="text-3xl font-black text-[#00338C] tracking-tight uppercase">Calendário de Avaliação (2026 - 2028)</h2>
+            <p class="text-slate-950 mt-2 font-black uppercase tracking-wide italic text-base">Ciclo Trienal INEP/CineBrasil</p>
+        </div>
+        
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-purple-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-purple-100 text-purple-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Contínuo</span><p class="text-3xl font-black text-purple-900 mt-4">Anual</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Licenciaturas e Medicina</p></div><div class="mt-8 pt-5 border-t border-purple-100 flex items-baseline gap-2"><p class="text-5xl font-black text-slate-950 tracking-tighter" id="countAnual">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-blue-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-blue-100 text-blue-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Ano II</span><p class="text-3xl font-black text-[#00338C] mt-4">2026</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Naturais, Tecnologia da Informação e Comunicação e Engenharias</p></div><div class="mt-8 pt-5 border-t border-blue-100 flex items-baseline gap-2"><p class="text-5xl font-black text-slate-950 tracking-tighter" id="count2026">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-emerald-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-emerald-100 text-emerald-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Ano III</span><p class="text-3xl font-black text-emerald-700 mt-4">2027</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Agrárias, Saúde e Serviços</p></div><div class="mt-8 pt-5 border-t border-emerald-100 flex items-baseline gap-2"><p class="text-4xl font-black text-slate-950 tracking-tighter" id="count2027">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+         <div class="bg-white rounded-[2rem] p-8 bento-shadow border border-amber-100 flex flex-col justify-between overflow-hidden"><div><span class="bg-amber-100 text-amber-950 text-xs font-black px-3 py-1.5 rounded-md uppercase tracking-wider">Ano I</span><p class="text-3xl font-black text-amber-800 mt-4">2028</p><p class="text-sm font-black text-slate-800 mt-1 uppercase">Sociais Aplicadas e Humanas</p></div><div class="mt-8 pt-5 border-t border-amber-100 flex items-baseline gap-2"><p class="text-5xl font-black text-slate-950 tracking-tighter" id="count2028">0</p><p class="text-sm font-black text-slate-950 uppercase">cursos</p></div></div>
+        </section>
+
+        <section class="bg-white rounded-[2.5rem] p-12 bento-shadow border border-gray-100 mb-10 overflow-hidden">
+         <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+          <h3 class="text-xl font-black text-slate-950 tracking-tight uppercase">Lista de Cursos Previstos</h3>
+          <select id="filterForecastYear" class="bg-slate-50 text-base font-black text-slate-950 px-5 py-3 rounded-xl border border-gray-200 outline-none uppercase cursor-pointer shadow-sm w-full md:w-auto" onchange="renderForecastTable()"><option value="">Todos os Anos</option><option value="Anual">Anual</option><option value="2026">2026</option><option value="2027">2027</option><option value="2028">2028</option></select>
+         </div>
+         <div class="w-full overflow-hidden rounded-3xl border border-gray-100 shadow-sm bg-white">
+          <table class="w-full text-base text-left">
+           <thead>
+             <tr class="bg-slate-50 text-slate-950 border-b border-gray-200 uppercase font-black text-sm tracking-widest">
+               <th class="py-5 px-8">Curso</th>
+               <th class="py-5 px-6">Unidade Universitária</th>
+               <th class="py-5 px-6">Área (CineBrasil)</th>
+               <th class="text-center py-5 px-8">Ano Previsto</th>
+             </tr>
+           </thead>
+           <tbody id="forecastTableBody" class="divide-y divide-gray-50"></tbody>
+          </table>
+         </div>
+        </section>
+    </div>
+   </main>
+
+   <footer class="py-12 max-w-7xl mx-auto px-4 border-t border-gray-200 text-center">
+    <span class="text-base text-[#00338C] font-black uppercase tracking-widest">© 2026 UEMS</span>
+   </footer>
+  </div>
+
+  <!-- MODAL GENÉRICO (POPUP DAS SEÇÕES - AMPLIAÇÃO) -->
+  <div id="genericModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center z-50 p-2 md:p-4 transition-opacity duration-300">
+   <div class="bg-white rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-slate-300 w-full max-w-5xl">
+    <div class="p-5 border-b border-gray-200 flex items-center justify-between bg-slate-100 z-10 shadow-sm">
+     <div>
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-blue-100 text-blue-800 text-xs font-black uppercase tracking-widest mb-2 shadow-sm border border-blue-200" id="genericModalBadge">DETALHE</div>
+      <h2 id="genericModalTitle" class="text-3xl font-black text-gray-900 tracking-tight leading-tight">Título da Seção</h2>
+      <p id="genericModalSubtitle" class="text-slate-700 font-black mt-1 uppercase text-sm tracking-widest">Subtítulo</p>
+     </div>
+     <button onclick="closeGenericModal()" class="w-14 h-14 bg-white rounded-full flex items-center justify-center text-red-600 hover:bg-red-50 hover:text-red-700 border-2 border-red-100 shadow-sm transition-transform hover:rotate-90 shrink-0"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg></button>
+    </div>
+    <!-- O conteúdo clonado entra aqui, com SCROLL ativo -->
+    <div class="flex-1 bg-slate-50 relative" id="genericModalContent"></div>
+   </div>
+  </div>
+
+  <!-- MODAL DETALHE DO CURSO (TELA DE VISUALIZAÇÃO - SISTEMA) -->
+  <div id="courseModal" class="hidden fixed inset-0 bg-slate-900/90 backdrop-blur-md flex items-center justify-center z-50 p-2 md:p-4 transition-opacity duration-300">
+   <div class="bg-white rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-slate-300 w-full max-w-4xl">
+    <div class="p-5 border-b border-gray-200 flex items-center justify-between bg-slate-100 z-10 shadow-sm no-print">
+     <div>
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-blue-100 text-blue-800 text-xs font-black uppercase tracking-widest mb-2 shadow-sm border border-blue-200" id="modalCourseCodeBadge">CÓD: 000000</div>
+      <h2 id="modalCourseTitle" class="text-3xl font-black text-gray-900 tracking-tight leading-tight">Nome do Curso</h2>
+      <p id="modalCourseSubtitle" class="text-slate-700 font-black mt-1 uppercase text-sm tracking-widest"></p>
+     </div>
+     <div class="flex items-center gap-3 no-print">
+      <button onclick="window.print()" class="w-14 h-14 bg-white rounded-full flex items-center justify-center text-[#00338C] hover:bg-blue-50 hover:text-blue-800 border-2 border-blue-100 shadow-sm transition-transform hover:scale-105 shrink-0" title="Gerar Relatório em PDF"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg></button>
+      <button onclick="closeModal()" class="w-14 h-14 bg-white rounded-full flex items-center justify-center text-red-600 hover:bg-red-50 hover:text-red-700 border-2 border-red-100 shadow-sm transition-transform hover:rotate-90 shrink-0"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg></button>
+     </div>
+    </div>
+    <!-- O conteúdo visual do Modal em Tela -->
+    <div class="flex-1 bg-slate-50 relative" id="modalContent"></div>
+   </div>
+  </div>
+
+  <!-- ÁREA DE IMPRESSÃO A4 (ESCONDIDA NA TELA, MOSTRADA NO PDF) -->
+  <div id="printArea" style="display: none;"></div>
+
+  <script>
+    // --- LÓGICA DO MODAL DE AMPLIAÇÃO DAS SEÇÕES (POPUP) ---
+    function openSectionModal(contentId, title, subtitle, badgeText, isDarkThemeSource) {
+        document.getElementById('genericModalTitle').textContent = title;
+        document.getElementById('genericModalSubtitle').textContent = subtitle;
+        document.getElementById('genericModalBadge').textContent = badgeText;
+
+        const originalContent = document.getElementById(contentId);
+        const clone = originalContent.cloneNode(true);
+        
+        const container = document.getElementById('genericModalContent');
+        container.innerHTML = '';
+        
+        const wrapper = document.createElement('div');
+        if (isDarkThemeSource) {
+            wrapper.className = 'w-full min-h-full modal-white-override bg-white rounded-b-[2rem] p-8';
+        } else {
+            wrapper.className = 'w-full min-h-full bg-white rounded-b-[2rem] p-8';
+        }
+        
+        wrapper.appendChild(clone);
+        container.appendChild(wrapper);
+        
+        const m = document.getElementById('genericModal'); 
+        m.classList.remove('hidden'); 
+        setTimeout(()=>m.style.opacity='1', 10);
+    }
+
+    function closeGenericModal() {
+        const m = document.getElementById('genericModal'); 
+        m.style.opacity='0'; 
+        setTimeout(()=>m.classList.add('hidden'), 300);
+        setTimeout(()=>document.getElementById('genericModalContent').innerHTML = '', 300);
+    }
+
+    // --- DADOS DO SISTEMA ---
+    const grauMap = {'45711':'Licenciatura','113050':'Licenciatura','68265':'Licenciatura','45713':'Licenciatura','45715':'Licenciatura','50933':'Licenciatura','123588':'Licenciatura','105780':'Licenciatura','105928':'Licenciatura','89022':'Licenciatura','150105':'Licenciatura','89018':'Licenciatura','89024':'Licenciatura','89029':'Licenciatura','150106':'Licenciatura','45701':'Licenciatura','45703':'Licenciatura','68313':'Licenciatura','113052':'Licenciatura','113054':'Licenciatura','113056':'Licenciatura','113058':'Licenciatura','50935':'Licenciatura','51044':'Licenciatura','95706':'Bacharelado','1190630':'Bacharelado','1190631':'Bacharelado','1265863':'Bacharelado','1313326':'Bacharelado','68321':'Bacharelado','150102':'Licenciatura','17762':'Bacharelado','17766':'Bacharelado','68315':'Bacharelado','68319':'Bacharelado','95708':'Bacharelado','113045':'Bacharelado','113047':'Bacharelado','123562':'Bacharelado','1117933':'Bacharelado','1313341':'Bacharelado','17735':'Bacharelado','45598':'Bacharelado','51042':'Bacharelado','45605':'Bacharelado','5000476':'Bacharelado','5000475':'Tecnológico','1314210':'Bacharelado','17768':'Bacharelado','150104':'Licenciatura'};
+    const nationalBenchmarks = { 'Administração':{enade:2.63,cpc:3.23,idd:2.83},'Agronomia':{enade:2.81,cpc:3.50,idd:3.04},'Ciência da Computação':{enade:2.20,cpc:3.35,idd:3.09},'Ciências Biológicas':{enade:2.57,cpc:3.51,idd:2.98},'Ciências Contábeis':{enade:2.69,cpc:3.27,idd:3.03},'Ciências Econômicas':{enade:2.28,cpc:3.29,idd:2.80},'Ciências Sociais':{enade:2.68,cpc:3.52,idd:2.97},'Direito':{enade:2.69,cpc:3.27,idd:3.07},'Enfermagem':{enade:2.63,cpc:3.38,idd:3.09},'Engenharia Ambiental e Sanitária':{enade:2.77,cpc:3.50,idd:3.04},'Engenharia de Alimentos':{enade:2.40,cpc:3.35,idd:2.88},'Engenharia Florestal':{enade:2.66,cpc:3.66,idd:3.08},'Física':{enade:2.40,cpc:3.40,idd:3.05},'Geografia':{enade:2.45,cpc:3.45,idd:2.95},'História':{enade:2.50,cpc:3.51,idd:3.13},'Letras-Português e Espanhol':{enade:2.22,cpc:3.26,idd:2.66},'Letras-Português e Inglês':{enade:2.66,cpc:3.40,idd:3.01},'Matemática':{enade:2.24,cpc:3.34,idd:3.00},'Medicina':{enade:2.88,cpc:3.36,idd:2.88},'Pedagogia':{enade:2.35,cpc:3.33,idd:3.02},'Química':{enade:2.41,cpc:3.52,idd:3.04},'Sistemas de Informação':{enade:2.25,cpc:3.29,idd:2.98},'Tecnologia em Gestão Ambiental':{enade:2.74,cpc:3.32,idd:2.76},'Turismo':{enade:2.69,cpc:3.24,idd:2.65},'Zootecnia':{enade:2.64,cpc:3.55,idd:2.99} };
+    
+    const forecastData = [
+      {curso:'Medicina', campus:'Campo Grande', area:'Saúde e bem-estar', ano:'Anual'},
+      {curso:'Geografia (Licenciatura)', campus:'Campo Grande', area:'Educação', ano:'Anual'},
+      {curso:'História', campus:'Campo Grande', area:'Educação', ano:'Anual'},
+      {curso:'Letras (Português/Inglês/Espanhol)', campus:'Campo Grande', area:'Educação', ano:'Anual'},
+      {curso:'Pedagogia', campus:'Campo Grande', area:'Educação', ano:'Anual'},
+      {curso:'Letras', campus:'Cassilândia', area:'Educação', ano:'Anual'},
+      {curso:'Matemática', campus:'Cassilândia', area:'Educação', ano:'Anual'},
+      {curso:'Física', campus:'Dourados', area:'Educação', ano:'Anual'},
+      {curso:'Letras', campus:'Dourados', area:'Educação', ano:'Anual'},
+      {curso:'Matemática', campus:'Dourados', area:'Educação', ano:'Anual'},
+      {curso:'Pedagogia', campus:'Dourados', area:'Educação', ano:'Anual'},
+      {curso:'Ciências Biológicas (Licenciatura)', campus:'Ivinhema', area:'Educação', ano:'Anual'},
+      {curso:'Geografia (Licenciatura)', campus:'Jardim', area:'Educação', ano:'Anual'},
+      {curso:'Letras', campus:'Jardim', area:'Educação', ano:'Anual'},
+      {curso:'Pedagogia', campus:'Maracaju', area:'Educação', ano:'Anual'},
+      {curso:'Ciências Biológicas (Licenciatura)', campus:'Mundo Novo', area:'Educação', ano:'Anual'},
+      {curso:'Química (Licenciatura)', campus:'Naviraí', area:'Educação', ano:'Anual'},
+      {curso:'Matemática', campus:'Nova Andradina', area:'Educação', ano:'Anual'},
+      {curso:'Ciências Sociais', campus:'Paranaíba', area:'Educação', ano:'Anual'},
+      {curso:'Pedagogia', campus:'Paranaíba', area:'Educação', ano:'Anual'},
+      {curso:'Ciências Biológicas (Bacharelado)', campus:'Campo Grande', area:'Ciências naturais, matemática e estatística', ano:2026},
+      {curso:'Ciências Biológicas (Bacharelado)', campus:'Dourados', area:'Ciências naturais, matemática e estatística', ano:2026},
+      {curso:'Química / Química Industrial', campus:'Dourados', area:'Ciências naturais, matemática e estatística', ano:2026},
+      {curso:'Gestão Ambiental', campus:'Mundo Novo', area:'Engenharia, produção e construção', ano:2026},
+      {curso:'Ciência da Computação', campus:'Dourados', area:'Computação e TIC', ano:2026},
+      {curso:'Sistemas de Informação', campus:'Dourados', area:'Computação e TIC', ano:2026},
+      {curso:'Sistemas de Informação', campus:'Nova Andradina', area:'Computação e TIC', ano:2026},
+      {curso:'Engenharia Ambiental e Sanitária', campus:'Dourados', area:'Engenharia, produção e construção', ano:2026},
+      {curso:'Engenharia Civil', campus:'Nova Andradina', area:'Engenharia, produção e construção', ano:2026},
+      {curso:'Engenharia de Alimentos', campus:'Naviraí', area:'Engenharia, produção e construção', ano:2026},
+      {curso:'Engenharia Florestal', campus:'Aquidauana', area:'Agricultura, silvicultura, pesca e veterinária', ano:2026},
+      {curso:'Agronomia', campus:'Aquidauana', area:'Agricultura, silvicultura, pesca e veterinária', ano:2027},
+      {curso:'Agronomia', campus:'Cassilândia', area:'Agricultura, silvicultura, pesca e veterinária', ano:2027},
+      {curso:'Agronomia', campus:'Maracaju', area:'Agricultura, silvicultura, pesca e veterinária', ano:2027},
+      {curso:'Agronomia', campus:'Mundo Novo', area:'Agricultura, silvicultura, pesca e veterinária', ano:2027},
+      {curso:'Zootecnia', campus:'Aquidauana', area:'Agricultura, silvicultura, pesca e veterinária', ano:2027},
+      {curso:'Enfermagem', campus:'Dourados', area:'Saúde e bem-estar', ano:2027},
+      {curso:'Fonoaudiologia', campus:'Campo Grande', area:'Saúde e bem-estar', ano:2027},
+      {curso:'Psicologia', campus:'Campo Grande', area:'Ciências sociais, comunicação e informação', ano:2027},
+      {curso:'Psicologia', campus:'Coxim', area:'Ciências sociais, comunicação e informação', ano:2027},
+      {curso:'Turismo', campus:'Campo Grande', area:'Serviços', ano:2027},
+      {curso:'Turismo', campus:'Dourados', area:'Serviços', ano:2027},
+      {curso:'Administração', campus:'Maracaju', area:'Negócios, administração e direito', ano:2028},
+      {curso:'Administração', campus:'Ponta Porã', area:'Negócios, administração e direito', ano:2028},
+      {curso:'Administração Pública', campus:'Campo Grande', area:'Negócios, administração e direito', ano:2028},
+      {curso:'Ciências Contábeis', campus:'Ponta Porã', area:'Negócios, administração e direito', ano:2028},
+      {curso:'Ciências Econômicas', campus:'Ponta Porã', area:'Ciências sociais, comunicação e informação', ano:2028},
+      {curso:'Direito', campus:'Aquidauana', area:'Negócios, administração e direito', ano:2028},
+      {curso:'Direito', campus:'Bataguassu', area:'Negócios, administração e direito', ano:2028},
+      {curso:'Direito', campus:'Campo Grande', area:'Negócios, administração e direito', ano:2028},
+      {curso:'Direito (Caso especial - 2 turmas)', campus:'Cassilândia', area:'Negócios, administração e direito', ano:2028},
+      {curso:'Direito', campus:'Dourados', area:'Negócios, administração e direito', ano:2028},
+      {curso:'Direito', campus:'Jardim', area:'Negócios, administração e direito', ano:2028},
+      {curso:'Direito', campus:'Naviraí', area:'Negócios, administração e direito', ano:2028},
+      {curso:'Direito', campus:'Paranaíba', area:'Negócios, administração e direito', ano:2028}
+    ];
+
+    const courseDataRaw = [ {area:'Ciências Biológicas (extinto)',codigo:'45711',municipio:'Coxim',idd2021:2.819,cpc2021:2.574,enade2021:2.265}, {area:'Ciências Sociais (em extinção)',codigo:'113050',municipio:'Amambai',idd2021:0.603,cpc2021:1.589,enade2021:0}, {area:'História (em extinção)',codigo:'68265',municipio:'Amambai',idd2021:2.447,cpc2021:2.863,enade2021:0.886}, {area:'Ciência da Computação',codigo:'68321',municipio:'Dourados',idd2021:2.728,cpc2021:3.035,enade2021:2.053}, {area:'Ciência da Computação',codigo:'150102',municipio:'Nova Andradina',idd2021:0,cpc2021:1.569,enade2021:1.42}, {area:'Ciências Biológicas',codigo:'45713',municipio:'Ivinhema',idd2021:2.272,cpc2021:2.398,enade2021:1.737}, {area:'Ciências Biológicas',codigo:'45715',municipio:'Mundo Novo',idd2021:2.297,cpc2021:2.837,enade2021:1.814}, {area:'Ciências Biológicas',codigo:'50933',municipio:'Dourados',idd2021:2.067,cpc2021:2.940,enade2021:2.305}, {area:'Ciências Biológicas',codigo:'1190630',municipio:'Ivinhema',idd2021:2.283,cpc2021:2.866,enade2021:1.972}, {area:'Ciências Biológicas',codigo:'1190631',municipio:'Dourados',idd2021:1.911,cpc2021:2.662,enade2021:1.625}, {area:'Ciências Sociais',codigo:'123588',municipio:'Paranaíba',idd2021:3.101,cpc2021:2.991,enade2021:2.598}, {area:'Ciências Sociais',codigo:'1265863',municipio:'Paranaíba',idd2021:2.978,cpc2021:2.604,enade2021:0.788}, {area:'Física',codigo:'105928',municipio:'Dourados',idd2021:2.774,cpc2021:2.909,enade2021:1.993}, {area:'Geografia',codigo:'105780',municipio:'Jardim',idd2021:2.421,cpc2021:2.670,enade2021:1.870}, {area:'Geografia',codigo:'150104',municipio:'Campo Grande',idd2021:2.049,cpc2021:2.975,enade2021:2.532}, {area:'Geografia',codigo:'1313326',municipio:'Campo Grande',idd2021:2.523,cpc2021:3.062,enade2021:2.042}, {area:'Letras-Português e Espanhol',codigo:'89022',municipio:'Dourados',idd2021:1.237,cpc2021:2.078,enade2021:0.840}, {area:'Letras-Português e Espanhol',codigo:'150105',municipio:'Campo Grande',idd2021:1.370,cpc2021:2.199,enade2021:1.657}, {area:'Letras-Português e Inglês',codigo:'89018',municipio:'Dourados',idd2021:1.484,cpc2021:2.295,enade2021:1.190}, {area:'Letras-Português e Inglês',codigo:'89024',municipio:'Cassilândia',idd2021:0.210,cpc2021:1.580,enade2021:1.406}, {area:'Letras-Português e Inglês',codigo:'89029',municipio:'Jardim',idd2021:2.029,cpc2021:2.389,enade2021:1.873}, {area:'Letras-Português e Inglês',codigo:'150106',municipio:'Campo Grande',idd2021:1.344,cpc2021:2.410,enade2021:2.855}, {area:'Matemática',codigo:'45701',municipio:'Cassilândia',idd2021:1.128,cpc2021:1.959,enade2021:1.584}, {area:'Matemática',codigo:'45703',municipio:'Nova Andradina',idd2021:1.502,cpc2021:2.155,enade2021:1.181}, {area:'Matemática',codigo:'68313',municipio:'Dourados',idd2021:1.372,cpc2021:2.368,enade2021:1.358}, {area:'Pedagogia',codigo:'113052',municipio:'Campo Grande',idd2021:2.562,cpc2021:3.135,enade2021:3.397}, {area:'Pedagogia',codigo:'113054',municipio:'Maracaju',idd2021:2.030,cpc2021:2.354,enade2021:1.732}, {area:'Pedagogia',codigo:'113056',municipio:'Paranaíba',idd2021:2.260,cpc2021:3.112,enade2021:2.527}, {area:'Pedagogia',codigo:'113058',municipio:'Dourados',idd2021:2.632,cpc2021:3.133,enade2021:2.656}, {area:'Química',codigo:'50935',municipio:'Dourados',idd2021:4.045,cpc2021:3.554,enade2021:3.142}, {area:'Química',codigo:'51044',municipio:'Naviraí',idd2021:2.303,cpc2021:2.323,enade2021:1.629}, {area:'Sistemas de Informação',codigo:'95706',municipio:'Dourados',idd2021:3.848,cpc2021:3.602,enade2021:3.564}, {area:'Direito',codigo:'17762',municipio:'Paranaíba',idd2022:1.540,cpc2022:2.320,enade2022:2.571}, {area:'Direito',codigo:'17766',municipio:'Dourados',idd2022:2.345,cpc2022:2.509,enade2022:3.286}, {area:'Turismo',codigo:'45605',municipio:'Dourados',idd2022:3.328,cpc2022:3.281,enade2022:2.686}, {area:'Direito',codigo:'68315',municipio:'Naviraí',idd2022:3.111,cpc2022:2.887,enade2022:3.241}, {area:'Ciências Econômicas',codigo:'68319',municipio:'Ponta Porã',idd2022:2.161,cpc2022:2.437,enade2022:1.292}, {area:'Ciências Contábeis',codigo:'95708',municipio:'Ponta Porã',idd2022:1.823,cpc2022:2.437,enade2022:2.442}, {area:'Administração',codigo:'113045',municipio:'Ponta Porã',idd2022:1.946,cpc2022:2.208,enade2022:2.024}, {area:'Administração',codigo:'113047',municipio:'Maracaju',idd2022:0.128,cpc2022:1.755,enade2022:1.409}, {area:'Turismo',codigo:'5000476',municipio:'Campo Grande',idd2022:0.900,cpc2022:2.169,enade2022:2.284}, {area:'Engenharia Florestal',codigo:'123562',municipio:'Aquidauana',idd2023:1.891,cpc2023:2.182,enade2023:1.399}, {area:'Zootecnia',codigo:'17735',municipio:'Aquidauana',idd2023:0.150,cpc2023:1.574,enade2023:0.401}, {area:'Agronomia',codigo:'45598',municipio:'Aquidauana',idd2023:1.491,cpc2023:2.539,enade2023:2.099}, {area:'Agronomia',codigo:'51042',municipio:'Cassilândia',idd2023:1.699,cpc2023:2.578,enade2023:2.301}, {area:'Engenharia Ambiental e Sanitária',codigo:'1117933',municipio:'Dourados',idd2023:0.857,cpc2023:2.180,enade2023:1.806}, {area:'Medicina',codigo:'1313341',municipio:'Campo Grande',idd2023:2.897,cpc2023:3.215,enade2023:3.774}, {area:'Engenharia de Alimentos',codigo:'1314210',municipio:'Naviraí',idd2023:2.924,cpc2023:2.656,enade2023:0.942}, {area:'Tecnologia em Gestão Ambiental',codigo:'5000475',municipio:'Mundo Novo',idd2023:2.994,cpc2023:3.516,enade2023:3.101}, {area:'Enfermagem',codigo:'17768',municipio:'Dourados',idd2023:2.408,cpc2023:2.789,enade2023:2.770} ];
+
+    let allData = [];
+    let curCol = 'cp', curDir = 'desc';
+
+    function getLatestValue(r, i) { 
+      for(let y of [2025,2024,2023,2022,2021]) { 
+        if(r[i+y]!=null) return r[i+y]; 
+      } 
+      return null; 
+    }
+    
+    function convertToRange(v) { 
+      if(v===null||v===undefined) return null; 
+      if(v < 0.945) return 1; 
+      if(v < 1.945) return 2; 
+      if(v < 2.945) return 3; 
+      if(v < 3.945) return 4; 
+      return 5; 
+    }
+
+    const statusConfig = {
+      1: { label: 'Não atende', cl: 'bg-[#DC2626]' },
+      2: { label: 'Insuficiente', cl: 'bg-[#F87171]' },
+      3: { label: 'Suficiente', cl: 'bg-[#EAB308]' },
+      4: { label: 'Bom', cl: 'bg-[#4ADE80]' },
+      5: { label: 'Muito bom', cl: 'bg-[#16A34A]' }
+    };
+
+    function getBadgeHtml(faixa, valor, size = 'sm') {
+      if (valor == null) return `<div class="px-3 py-1 bg-slate-100 rounded-md border text-slate-950 text-base font-black">-</div>`;
+      let st = statusConfig[faixa] || { label: 'S/D', cl: 'bg-slate-400' };
+      let v = Number(valor);
+      let txtColor = (faixa === 3 || faixa === 4) ? 'text-slate-950' : 'text-white';
+      if (size === 'lg') {
+        return `<div class="inline-flex rounded-xl overflow-hidden border border-slate-300 shadow-md"><div class="flex items-center justify-center min-w-[60px] px-6 py-4 font-black text-5xl ${txtColor} ${st.cl}">${faixa}</div><div class="flex items-center justify-center min-w-[90px] px-6 py-4 font-black text-5xl bg-[#fffcf0] text-slate-900">${v.toFixed(2)}</div></div>`;
+      }
+      return `<div class="inline-flex rounded-lg overflow-hidden border border-slate-300 shadow-sm"><div class="flex items-center justify-center min-w-[40px] px-3 py-2 font-black text-lg ${txtColor} ${st.cl}">${faixa}</div><div class="flex items-center justify-center min-w-[64px] px-3 py-2 font-black text-lg bg-[#fffcf0] text-slate-900">${v.toFixed(2)}</div></div>`;
+    }
+
+    function createBadge(v, nV) {
+      if(v==null) return `<div class="inline-flex rounded-md border border-slate-400 bg-slate-50"><div class="px-3 py-1 font-black text-sm">-</div></div>`;
+      let r = convertToRange(v);
+      let st = statusConfig[r] || { label: 'S/D', cl: 'bg-slate-400' };
+      let txtColor = (r === 3 || r === 4) ? 'text-slate-900' : 'text-white';
+      let icon = (nV!=null) ? (v-nV > 0 ? `<svg class="w-2.5 h-2.5 ml-1 inline text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>` : (v-nV < 0 ? `<svg class="w-2.5 h-2.5 ml-1 inline text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>` : `<span class="ml-1 text-xs font-black">=</span>`)) : '';
+      let tooltip = nV != null ? `Média Nacional: ${nV.toFixed(2)}` : 'Sem Referência';
+      return `<div title="${tooltip}" class="inline-flex rounded-lg overflow-hidden border border-slate-400 cursor-help"><div class="flex items-center justify-center min-w-[32px] px-2 py-1.5 font-black text-base ${txtColor} ${st.cl}">${r}</div><div class="flex items-center justify-center min-w-[50px] px-2 py-1.5 font-black text-base bg-[#fffcf0] text-slate-900">${v.toFixed(3)}${icon}</div></div>`;
+    }
+
+    function switchTab(tabId) {
+      document.getElementById('view-results').classList.toggle('hidden', tabId !== 'results');
+      document.getElementById('view-forecast').classList.toggle('hidden', tabId !== 'forecast');
+      document.getElementById('btn-tab-results').classList.toggle('active', tabId === 'results');
+      document.getElementById('btn-tab-forecast').classList.toggle('active', tabId === 'forecast');
+      if(tabId === 'forecast') renderForecastTable();
+    }
+
+    function handleSort(c) {
+      curDir = (curCol === c && curDir === 'desc') ? 'asc' : 'desc'; 
+      curCol = c;
+      ['en','id','cp'].forEach(x => { 
+        let el = document.getElementById('sort-' + x);
+        if (el) { 
+          el.textContent = x === curCol ? (curDir === 'desc' ? '↓' : '↑') : '↕'; 
+          el.className = x === curCol ? 'text-blue-900 text-sm font-black' : 'text-slate-500 text-xs'; 
+        }
+      });
+      renderTable();
+    }
+
+    function renderTable() {
+      const fc = document.getElementById('filterCourse').value;
+      const fg = document.getElementById('filterGrau').value;
+      const fm = document.getElementById('filterCampus').value;
+      const fs = document.getElementById('filterStatus').value;
+      
+      const filtered = allData.filter(r => {
+        let grau = grauMap[r.codigo] ? ` (${grauMap[r.codigo]})` : '';
+        let grauReal = grauMap[r.codigo] || '';
+        
+        return (!fc || `${r.area}${grau}` === fc) && 
+               (!fg || grauReal === fg) &&
+               (!fm || r.municipio === fm) && 
+               (!fs || (r.fn >= 4 && fs === 'BOM') || (r.fn === 3 && fs === 'SUFICIENTE') || (r.fn <= 2 && fs === 'INSUFICIENTE'));
+      });
+      
+      filtered.sort((a,b) => {
+        let valA = a[curCol] ?? -1;
+        let valB = b[curCol] ?? -1;
+        if (valA !== valB) return (curDir === 'desc' ? -1 : 1) * (valA - valB);
+        return a.area.localeCompare(b.area);
+      });
+
+      const recordEl = document.getElementById('recordCount');
+      if(recordEl) recordEl.textContent = filtered.length;
+
+      const body = document.getElementById('allCoursesTableBody');
+      if(body) {
+        body.innerHTML = filtered.map(r => {
+            let ac = r.area.replace(' (extinto)', '').replace(' (em extinção)', '').trim();
+            let b = nationalBenchmarks[ac]||{};
+            let gs = grauMap[r.codigo] ? ` (${grauMap[r.codigo]})` : '';
+            return `<tr class="hover:bg-blue-50 transition-colors cursor-pointer border-b border-slate-100" onclick="openModal('${r.codigo}')">
+                <td class="py-4 px-6"><div class="flex flex-col"><span class="font-black text-blue-950">${r.area}${gs}</span><span class="text-xs font-bold uppercase text-slate-500 tracking-wider mt-1">CÓD: ${r.codigo}</span></div></td>
+                <td class="py-4 px-6 text-center font-black uppercase text-sm">${r.municipio}</td>
+                <td class="py-4 px-2 text-center">${createBadge(r.en, b.enade)}</td>
+                <td class="py-4 px-2 text-center">${createBadge(r.id, b.idd)}</td>
+                <td class="py-4 px-2 text-center">${createBadge(r.cp, b.cpc)}</td>
+                <td class="py-4 px-6 text-center"><span class="px-3 py-1.5 ${statusConfig[r.fn]?.cl || 'bg-slate-400'} ${r.fn >= 3 && r.fn <= 4 ? 'text-slate-900' : 'text-white'} rounded-lg text-xs font-black uppercase tracking-wider inline-block">${statusConfig[r.fn]?.label || 'S/D'}</span></td>
+            </tr>`;
+        }).join('');
+      }
+    }
+
+    function initTable() {
+      allData = courseDataRaw.map(r => {
+        let en=getLatestValue(r,'enade'), cp=getLatestValue(r,'cpc'), id=getLatestValue(r,'idd');
+        let fn = convertToRange(cp) ?? convertToRange(en);
+        return { ...r, en, cp, id, fn };
+      });
+      
+      let hl=0, cr=0, hlMap={}, crMap={};
+      allData.forEach(r => {
+        let base = r.area.replace(' (extinto)', '').replace(' (em extinção)', '').trim();
+        let g = grauMap[r.codigo] ? ` (${grauMap[r.codigo]})` : '';
+        let cn = base === 'Geografia' ? base + g : base;
+        
+        if(r.fn >= 4) { 
+          hl++; 
+          if(!hlMap[cn]) hlMap[cn] = [];
+          hlMap[cn].push(r.municipio); 
+        }
+        if(r.fn != null && r.fn <= 2) { 
+          cr++; 
+          if(!crMap[cn]) crMap[cn] = [];
+          crMap[cn].push(r.municipio); 
+        }
+      });
+      
+      document.getElementById('highlightCount').textContent = hl;
+      document.getElementById('criticalCount').textContent = cr;
+      document.getElementById('highlightPercentage').textContent = Math.round((hl/allData.length)*100) + '%';
+      document.getElementById('criticalPercentage').textContent = Math.round((cr/allData.length)*100) + '%';
+      document.getElementById('totalRecords').textContent = allData.length;
+      
+      const renderTags = (id, mapObj, cl) => {
+        const el = document.getElementById(id);
+        if(el) {
+            let html = '';
+            let keys = Object.keys(mapObj).sort();
+            for(let course of keys) {
+                let campuses = [...new Set(mapObj[course])].join(', ');
+                html += `<span title="Unidade Universitária: ${campuses}" class="inline-block px-3 py-1.5 bg-white ${cl} text-[11px] font-black rounded-lg border border-slate-200 shadow-sm uppercase truncate max-w-[200px] cursor-help hover:bg-slate-50 transition-colors">${course}</span>`;
+            }
+            el.innerHTML = html;
+        }
+      };
+      
+      renderTags('highlightBadges', hlMap, 'text-emerald-700');
+      renderTags('criticalBadges', crMap, 'text-red-700');
+      
+      let fc=document.getElementById('filterCourse'), fm=document.getElementById('filterCampus');
+      [...new Set(allData.map(r => `${r.area}${grauMap[r.codigo]?` (${grauMap[r.codigo]})`:''}`))].sort().forEach(c => fc.add(new Option(c,c)));
+      [...new Set(allData.map(r => r.municipio))].sort().forEach(m => fm.add(new Option(m,m)));
+      
+      document.getElementById('instTopBadge').innerHTML = getBadgeHtml(convertToRange(2.87), 2.87, 'lg');
+      document.getElementById('instEnadeBadge').innerHTML = getBadgeHtml(convertToRange(2.01), 2.01);
+      document.getElementById('instIddBadge').innerHTML = getBadgeHtml(convertToRange(2.02), 2.02);
+      document.getElementById('instCpcBadge').innerHTML = getBadgeHtml(convertToRange(2.57), 2.57);
+      
+      renderTable(); 
+      buildCampusCharts(); 
+      renderStateComparison(); 
+      renderForecastTable();
+      renderEnadePieChart();
+    }
+
+    function renderEnadePieChart() {
+      let counts = {1:0, 2:0, 3:0, 4:0, 5:0};
+      let total = 0;
+      
+      allData.forEach(r => {
+        if(!r.area.includes('extinto') && !r.area.includes('extinção')) {
+          let range = convertToRange(r.en);
+          if (range) {
+            counts[range]++;
+            total++;
+          }
+        }
+      });
+
+      const ctx = document.getElementById('enadePieChart');
+      if (!ctx) return;
+      
+      if (window.enadeChartInstance) {
+          window.enadeChartInstance.destroy();
+      }
+      
+      const data = [counts[1], counts[2], counts[3], counts[4], counts[5]];
+      const labels = [
+          'Não atende (0,000 a 0,944)',
+          'Insuficiente (0,945 a 1,944)',
+          'Suficiente (1,945 a 2,944)',
+          'Bom (2,945 a 3,944)',
+          'Muito bom (3,945 a 5,000)'
+      ];
+      const colors = ['#DC2626', '#F87171', '#EAB308', '#4ADE80', '#16A34A'];
+      const shortLabels = ['Não atende', 'Insuficiente', 'Suficiente', 'Bom', 'Muito bom'];
+      
+      window.enadeChartInstance = new Chart(ctx, {
+          type: 'pie',
+          data: {
+              labels: labels,
+              datasets: [{
+                  data: data,
+                  backgroundColor: colors,
+                  borderWidth: 3,
+                  borderColor: '#ffffff',
+                  hoverOffset: 20
+              }]
+          },
+          options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              layout: { padding: 25 },
+              animation: { animateScale: true, animateRotate: true, duration: 1200, easing: 'easeOutQuart' },
+              plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                      backgroundColor: 'rgba(11, 20, 40, 0.95)',
+                      titleFont: { family: 'Inter', size: 14, weight: 'bold' },
+                      bodyFont: { family: 'Inter', size: 15, weight: 'bold' },
+                      padding: 16,
+                      cornerRadius: 16,
+                      boxPadding: 8,
+                      usePointStyle: true,
+                      borderColor: 'rgba(255,255,255,0.1)',
+                      borderWidth: 1,
+                      displayColors: true,
+                      callbacks: {
+                          title: function() { return ''; },
+                          label: function(context) {
+                              let value = context.raw;
+                              let pct = total > 0 ? Math.round((value / total) * 100) : 0;
+                              return `  ${shortLabels[context.dataIndex]}: ${pct}% dos cursos (${value})`;
+                          }
+                      }
+                  }
+              }
+          }
+      });
+
+      const legendContainer = document.getElementById('enadePieLegend');
+      let legendHTML = '';
+      for(let i=5; i>=1; i--) {
+          let pct = total > 0 ? Math.round((counts[i] / total) * 100) : 0;
+          legendHTML += `
+          <div class="group flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.05)] hover:shadow-[0_10px_20px_-5px_rgba(0,0,0,0.1)] hover:-translate-y-1 transition-all duration-300 cursor-default">
+              <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 shrink-0 rounded-xl flex items-center justify-center text-white font-black shadow-inner text-xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3" style="background-color: ${colors[i-1]}">${i}</div>
+                  <div>
+                      <p class="text-sm font-black text-slate-800 uppercase leading-tight">${shortLabels[i-1]}</p>
+                      <p class="text-[11px] font-bold text-slate-500 mt-0.5">${labels[i-1].split('(')[1].replace(')','')}</p>
+                  </div>
+              </div>
+              <div class="text-right pl-4">
+                  <p class="text-2xl font-black text-slate-900 leading-tight">${pct}%</p>
+                  <p class="text-[10px] font-bold text-slate-500 uppercase mt-0.5 tracking-wider inline-block">${counts[i]} cursos</p>
+              </div>
+          </div>`;
+      }
+      legendContainer.innerHTML = legendHTML;
+    }
+
+    function renderForecastTable() {
+      const yf = document.getElementById('filterForecastYear').value;
+      const counts = {Anual:0, 2026:0, 2027:0, 2028:0};
+      forecastData.forEach(f => counts[f.ano]++);
+      
+      document.getElementById('countAnual').textContent = counts.Anual;
+      document.getElementById('count2026').textContent = counts[2026];
+      document.getElementById('count2027').textContent = counts[2027];
+      document.getElementById('count2028').textContent = counts[2028];
+      
+      let fd = yf ? forecastData.filter(d => d.ano.toString() === yf) : forecastData;
+      document.getElementById('forecastTableBody').innerHTML = fd.map(f => {
+        let bcl = f.ano === 'Anual' ? 'bg-purple-100 text-purple-950' : f.ano === 2026 ? 'bg-blue-100 text-blue-950' : f.ano === 2027 ? 'bg-emerald-100 text-emerald-950' : 'bg-amber-100 text-amber-950';
+        return `<tr class="hover:bg-slate-50 border-b border-slate-100"><td class="py-5 px-8 font-black text-blue-950">${f.curso}</td><td class="py-5 px-6 font-black uppercase text-sm">${f.campus}</td><td class="py-5 px-6 font-black text-sm">${f.area}</td><td class="py-5 px-8 text-center"><span class="px-4 py-1.5 rounded-full font-black text-xs uppercase tracking-widest inline-block ${bcl}">${f.ano}</span></td></tr>`;
+      }).join('');
+    }
+
+    function buildCampusCharts() {
+      let map = {};
+      allData.forEach(r => { 
+        if(!r.area.includes('extinto') && !r.area.includes('extinção') && r.municipio !== 'Amambai') { 
+            if(!map[r.municipio]) map[r.municipio]={s:0,c:0}; 
+            let er=convertToRange(r.en); 
+            if(er){
+                map[r.municipio].s+=er; 
+                map[r.municipio].c++;
+            }
+        }
+      });
+      const arr = Object.keys(map).map(m=>({m,v:map].c>0?map].s/map].c:0,c:map].c})).sort((a,b)=>b.v-a.v);
+      document.getElementById('content-campus').innerHTML = arr.map(i=>`<div class="flex items-center gap-4 break-inside-avoid"><div class="w-40 text-right shrink-0"><p class="text-sm font-black uppercase leading-none truncate" title="${i.m}">${i.m}</p><p class="text-xs font-bold text-slate-500 uppercase mt-1">${i.c} cursos</p></div><div class="flex-1 h-8 bg-slate-100 rounded-full overflow-hidden relative"><div class="h-full bg-gradient-to-r from-blue-700 to-cyan-500 flex items-center justify-end pr-3 bar-animate" style="width:${(i.v/5)*100}%"><span class="text-sm text-white font-black leading-none">${i.v.toFixed(2)}</span></div></div></div>`).join('');
+    }
+
+    function renderStateComparison() {
+      const data = [
+        {ies:'UEMS',en:[3,2.01],idd:[3,2.02],cp:[3,2.57],ig:[3,2.87]},
+        {ies:'UFGD',en:[3,2.56],idd:[3,2.72],cp:[4,3.20],ig:[4,3.65]},
+        {ies:'UFMS',en:[3,2.59],idd:[3,2.36],cp:[4,3.16],ig:[4,3.58]}
+      ];
+      document.getElementById('stateComparisonBody').innerHTML = data.map(d=>`<tr class="hover:bg-slate-50 border-b border-slate-50 break-inside-avoid"><td class="py-5 px-6 font-black text-2xl text-slate-900">${d.ies}</td><td class="py-5 px-2 text-center">${getBadgeHtml(d.en[0], d.en[1])}</td><td class="py-5 px-2 text-center">${getBadgeHtml(d.idd[0], d.idd[1])}</td><td class="py-5 px-2 text-center">${getBadgeHtml(d.cp[0], d.cp[1])}</td><td class="py-5 px-6 text-center">${getBadgeHtml(d.ig[0], d.ig[1])}</td></tr>`).join('');
+    }
+
+    function openModal(cod) {
+      const r = allData.find(x=>x.codigo===cod); 
+      if(!r) return;
+      
+      let ac = r.area.replace(' (extinto)', '').replace(' (em extinção)', '').trim(); 
+      let b = nationalBenchmarks[ac]||{};
+      
+      let cursoNome = `${r.area}${grauMap[cod]?` (${grauMap[cod]})`:''}`;
+      
+      // Monta os dados para a Tela
+      document.getElementById('modalCourseTitle').textContent = cursoNome;
+      document.getElementById('modalCourseSubtitle').textContent = `Unidade Universitária: ${r.municipio}`;
+      document.getElementById('modalCourseCodeBadge').textContent = `CÓD: ${cod}`;
+      
+      const fv = (v) => v == null ? '-' : Number(v).toFixed(3);
+      
+      const getH = (i) => {
+        let h = [21,22,23,24,25].map(y => r[i+'20'+y]);
+        let d = (h[0]!=null && h[4]!=null) ? (h[4]-h[0]) : 0;
+        return h.map((v, idx) => `<td class="py-3 px-1 sm:py-5 sm:px-3 ${idx >= 3 ? 'bg-slate-200' : ''}"><span class="inline-block px-1.5 py-1 sm:px-3 sm:py-1.5 rounded-lg font-black text-sm border border-slate-300 ${v!=null? statusConfig[convertToRange(v)].cl + (convertToRange(v)===3||convertToRange(v)===4 ? ' text-slate-950' : ' text-white') + ' shadow-md' : 'bg-slate-100 text-slate-950'}">${fv(v)}</span></td>`).join('') + `<td class="text-center py-3 px-1 sm:py-5 sm:px-3 font-black text-sm ${d > 0 ? 'text-green-800' : (d < 0 ? 'text-red-800' : 'text-slate-950')}">${d ? (d > 0 ? '+' : '') + d.toFixed(3) : '-'}</td>`;
+      };
+
+      const buildComp = (t,v,n) => {
+          if(v==null) return `<div class="bg-slate-50 rounded-xl p-4 border text-center text-xs font-black uppercase text-slate-500 flex items-center justify-center break-inside-avoid">${t} Indisponível</div>`;
+          let d = n != null ? (v-n) : 0;
+          let isP = d >= 0;
+          let faixa = convertToRange(v);
+          let faixaClass = statusConfig[faixa]?.cl || 'bg-slate-400';
+
+          return `<div class="bg-white rounded-2xl p-6 border border-slate-300 shadow-sm relative overflow-hidden break-inside-avoid">
+            <div class="flex justify-between items-start mb-4">
+                <h4 class="text-xs font-black uppercase text-slate-500 tracking-widest">${t}</h4>
+                ${n?`<span class="inline-block ${isP?'text-green-800 bg-green-100':'text-red-800 bg-red-100'} px-2 py-0.5 rounded shadow-sm border font-black text-[10px] uppercase">${isP?'↑':'↓'} ${Math.abs(d).toFixed(2)} vs Nac.</span>`:'<span class="text-[10px] font-black text-slate-500 uppercase">Sem Ref.</span>'}
+            </div>
+            <div class="flex justify-between items-end mb-2">
+                <div class="flex flex-col items-start gap-1">
+                    <span class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Contínuo</span>
+                    <div class="flex items-baseline gap-1"><span class="text-4xl font-black text-slate-900" title="Nota Contínua">${v.toFixed(3)}</span><span class="text-sm font-black text-slate-400">/ 5.0</span></div>
+                </div>
+                <div class="text-right flex flex-col items-center">
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Conceito</p>
+                    <div class="flex items-center justify-center w-10 h-10 rounded-2xl text-white font-black text-2xl shadow-lg border border-white/20 ${faixaClass}">${faixa}</div>
+                </div>
+            </div>
+            <div class="h-2 bg-slate-200 rounded-full mt-4 overflow-hidden relative w-full">
+                <div class="absolute top-0 left-0 h-full ${faixaClass}" style="width:${(v/5)*100}%"></div>
+                ${n != null ? `<div class="absolute top-[-2px] bottom-[-2px] w-1.5 bg-slate-900 rounded-full shadow-md z-10 border border-white" style="left:${(n/5)*100}%"></div>` : ''}
+            </div>
+            <div class="flex justify-between mt-2">
+                <span class="text-[10px] font-black text-slate-500 uppercase">Seu Curso</span>
+                ${n!=null?`<span class="text-[10px] font-black text-slate-500 uppercase">Média Nac. (${n.toFixed(2)})</span>`:''}
+            </div>
+          </div>`;
+      };
+      
+      // Prepara o conteúdo da TELA
+      document.getElementById('modalContent').innerHTML = `
+        <h3 class="text-base font-black text-slate-950 uppercase tracking-widest mb-6">Comparativo Institucional vs. Média Nacional</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            ${buildComp('ENADE',r.en,b.enade)}
+            ${buildComp('IDD',r.id,b.idd)}
+            ${buildComp('CPC',r.cp,b.cpc)}
+        </div>
+        <h3 class="text-base font-black text-slate-950 uppercase tracking-widest mb-6 text-center mt-4">Histórico Detalhado</h3>
+        <div class="history-wrapper w-full overflow-x-auto overflow-y-visible rounded-[2rem] border border-slate-300 shadow-sm break-inside-avoid bg-white mb-8">
+            <table class="w-full text-sm text-center min-w-[800px]">
+                <thead>
+                    <tr class="bg-slate-200 text-slate-950 text-sm font-black border-b border-slate-400 uppercase tracking-widest">
+                        <th class="text-left py-6 px-10">Indicador</th><th>21</th><th>22</th><th>23</th><th>24</th><th>25</th><th class="px-10">Var</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-300 bg-white">
+                    <tr><td class="font-black py-5 px-10 uppercase text-sm text-slate-950 text-left">ENADE</td>${getH('enade')}</tr>
+                    <tr><td class="font-black py-5 px-10 uppercase text-sm text-slate-950 text-left">IDD</td>${getH('idd')}</tr>
+                    <tr><td class="font-black py-5 px-10 uppercase text-sm text-slate-950 text-left">CPC</td>${getH('cpc')}</tr>
+                </tbody>
+            </table>
+        </div>
+      `;
+
+      // =======================================================
+      // CONSTRUÇÃO DO CONTEÚDO PARA O PDF INSTITUCIONAL
+      // =======================================================
+      const formatNum = (v) => v == null ? '-' : Number(v).toFixed(3).replace('.', ',');
+      
+      const formatConcept = (v) => {
+          if(v == null) return '-';
+          let r = convertToRange(v);
+          if(r===1) return '1 - Não atende';
+          if(r===2) return '2 - Insuficiente';
+          if(r===3) return '3 - Suficiente';
+          if(r===4) return '4 - Bom';
+          if(r===5) return '5 - Muito bom';
+          return '-';
+      };
+      
+      const formatSit = (v, n) => {
+          if(v == null || n == null) return '<span class="text-gray-500">Sem Referência</span>';
+          let diff = v - n;
+          if(diff >= 0) return `<span class="text-blue-600 font-medium">Acima da Média (↑ ${diff.toFixed(2).replace('.',',')})</span>`;
+          return `<span class="text-red-600 font-medium">Abaixo da Média (↓ ${Math.abs(diff).toFixed(2).replace('.',',')})</span>`;
+      };
+
+      const getPrintH = (i) => {
+          let h = [21,22,23,24,25].map(y => r[i+'20'+y]);
+          let d = (h[0]!=null && h[4]!=null) ? (h[4]-h[0]) : 0;
+          let varHtml = '-';
+          if (h[0]!=null && h[4]!=null) {
+              if(d > 0) varHtml = `<span class="text-blue-600 font-bold">↑ +${d.toFixed(3).replace('.',',')}</span>`;
+              else if (d < 0) varHtml = `<span class="text-red-600 font-bold">↓ ${d.toFixed(3).replace('.',',')}</span>`;
+              else varHtml = `<span class="text-gray-600 font-bold">= 0,000</span>`;
+          }
+          return `
+              <td class="p-2">${h[0]==null ? '<span class="text-gray-400">-</span>' : formatNum(h[0])}</td>
+              <td class="p-2">${h[1]==null ? '<span class="text-gray-400">-</span>' : formatNum(h[1])}</td>
+              <td class="p-2">${h[2]==null ? '<span class="text-gray-400">-</span>' : formatNum(h[2])}</td>
+              <td class="p-2">${h[3]==null ? '<span class="text-gray-400">-</span>' : formatNum(h[3])}</td>
+              <td class="p-2">${h[4]==null ? '<span class="text-gray-400">-</span>' : formatNum(h[4])}</td>
+              <td class="p-2 text-right">${varHtml}</td>
+          `;
+      };
+
+      const dataAtual = new Date().toLocaleDateString('pt-BR');
+
+      document.getElementById('printArea').innerHTML = `
+        <div class="text-center mb-8">
+            <div class="mb-4 flex justify-center">
+                <img src="https://www.uems.br/anexos/imagens/conteudo/uems_imagens_2025-06-13_13-31-53.png" alt="Logo UEMS" class="h-24 mx-auto">
+            </div>
+            <h1 class="uems-blue text-xl font-bold uppercase tracking-tight">Divisão de Gestão do ENADE e Indicadores da Educação Superior</h1>
+            <h2 class="text-lg font-semibold uppercase">Relatório de Monitoramento de Curso - SINAES</h2>
+            <p class="text-sm text-gray-500">Data de Emissão: ${dataAtual}</p>
+        </div>
+
+        <section class="mb-8">
+            <h3 class="text-md font-bold border-b-2 border-gray-100 pb-1 mb-3 uppercase tracking-wide">1. Identificação do Curso</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <p><strong>Curso:</strong> ${cursoNome}</p>
+                <p><strong>Unidade Universitária:</strong> ${r.municipio}</p>
+                <p><strong>Código INEP:</strong> ${cod}</p>
+            </div>
+        </section>
+
+        <section class="mb-8">
+            <h3 class="text-md font-bold border-b-2 border-gray-100 pb-1 mb-3 uppercase tracking-wide">2. Resultados Consolidados (Último Ciclo Avaliativo)</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead>
+                        <tr class="bg-uems-blue text-white font-semibold">
+                            <th class="p-3 border-b border-blue-900">Indicador</th>
+                            <th class="p-3 text-center border-b border-blue-900">Nota Contínua</th>
+                            <th class="p-3 border-b border-blue-900">Conceito Final</th>
+                            <th class="p-3 text-center border-b border-blue-900">Média Nacional</th>
+                            <th class="p-3 border-b border-blue-900 text-right">Situação vs. Nacional</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-zebra">
+                        <tr class="border-b border-gray-100">
+                            <td class="p-3 font-semibold">ENADE</td>
+                            <td class="p-3 text-center font-mono">${formatNum(r.en)}</td>
+                            <td class="p-3 font-semibold">${formatConcept(r.en)}</td>
+                            <td class="p-3 text-center">${formatNum(b.enade)}</td>
+                            <td class="p-3 text-right">${formatSit(r.en, b.enade)}</td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="p-3 font-semibold">IDD</td>
+                            <td class="p-3 text-center font-mono">${formatNum(r.id)}</td>
+                            <td class="p-3 font-semibold">${formatConcept(r.id)}</td>
+                            <td class="p-3 text-center">${formatNum(b.idd)}</td>
+                            <td class="p-3 text-right">${formatSit(r.id, b.idd)}</td>
+                        </tr>
+                        <tr class="border-b border-gray-100">
+                            <td class="p-3 font-semibold">CPC</td>
+                            <td class="p-3 text-center font-mono">${formatNum(r.cp)}</td>
+                            <td class="p-3 font-semibold">${formatConcept(r.cp)}</td>
+                            <td class="p-3 text-center">${formatNum(b.cpc)}</td>
+                            <td class="p-3 text-right">${formatSit(r.cp, b.cpc)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="mb-8 bg-gray-50 p-5 rounded-lg border border-gray-200">
+            <h3 class="text-md font-bold mb-3 uppercase tracking-wide">3. Entendendo a Composição das Notas</h3>
+            <p class="text-sm mb-4 text-gray-600 italic text-justify">Para fins de diagnóstico e planejamento de ações da coordenação, detalhamos abaixo o que cada indicador mede e como o CPC é composto:</p>
+            <ul class="text-sm space-y-4">
+                <li><strong>ENADE:</strong> Avalia o rendimento dos concluintes em relação aos conteúdos previstos nas diretrizes curriculares.</li>
+                <li><strong>IDD (Indicador de Diferença entre Desempenhos):</strong> Mede o "valor agregado" pelo curso ao aluno. 
+                    <div class="mt-2 bg-blue-50 p-3 border-l-4 border-blue-800 text-xs text-gray-700 rounded-r-md">
+                        <strong>Exemplo Prático:</strong> Imagine que um aluno ingressou na UEMS com uma nota baixa no ENEM (indicando base escolar frágil). Se, ao se formar, este mesmo aluno obtiver uma nota alta no ENADE, o IDD será elevado. Isso prova que a <strong>UEMS agregou conhecimento</strong> e transformou a trajetória acadêmica do estudante.
+                    </div>
+                </li>
+                <li><strong>Composição do CPC:</strong>
+                    <div class="flex flex-wrap gap-4 mt-2">
+                        <span class="bg-white border px-3 py-1 rounded-full text-xs"><strong>35%</strong> IDD</span>
+                        <span class="bg-white border px-3 py-1 rounded-full text-xs"><strong>30%</strong> Corpo Docente</span>
+                        <span class="bg-white border px-3 py-1 rounded-full text-xs"><strong>20%</strong> Nota ENADE</span>
+                        <span class="bg-white border px-3 py-1 rounded-full text-xs"><strong>15%</strong> Questionário Estudante</span>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <section class="mb-12 page-break">
+            <h3 class="text-md font-bold border-b-2 border-gray-100 pb-1 mb-4 uppercase tracking-wide">4. Histórico Detalhado e Parâmetros de Avaliação</h3>
+            <div class="flex flex-col gap-8">
+                <div>
+                    <h4 class="text-xs font-bold text-gray-500 mb-2 uppercase italic">Evolução das Notas (2021-2025)</h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-center text-sm border-collapse border border-gray-200">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="p-3 text-left border-b border-gray-300">Indicador</th>
+                                    <th class="p-2 border-b border-gray-300">2021</th>
+                                    <th class="p-2 border-b border-gray-300">2022</th>
+                                    <th class="p-2 border-b border-gray-300">2023</th>
+                                    <th class="p-2 border-b border-gray-300">2024</th>
+                                    <th class="p-2 border-b border-gray-300">2025</th>
+                                    <th class="p-2 text-right border-b border-gray-300">Variação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100">
+                                    <td class="p-3 text-left font-semibold">ENADE</td>
+                                    ${getPrintH('enade')}
+                                </tr>
+                                <tr class="border-b border-gray-100 bg-gray-50">
+                                    <td class="p-3 text-left font-semibold">IDD</td>
+                                    ${getPrintH('idd')}
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="p-3 text-left font-semibold">CPC</td>
+                                    ${getPrintH('cpc')}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="w-full mt-4">
+                    <h4 class="text-xs font-bold text-gray-500 mb-2 uppercase italic">Legenda Oficial (INEP)</h4>
+                    <table class="w-full text-xs border-collapse border border-gray-200">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-600">
+                                <th class="p-2 border-b text-left">Conceito</th>
+                                <th class="p-2 border-b text-right">Faixa de Nota Contínua</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700">
+                            <tr>
+                                <td class="p-2 border-b"><span class="w-2 h-2 inline-block bg-red-600 mr-2 rounded-full"></span>1 - Não atende</td>
+                                <td class="p-2 border-b text-right">0 a 0.944</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 border-b"><span class="w-2 h-2 inline-block bg-orange-500 mr-2 rounded-full"></span>2 - Insuficiente</td>
+                                <td class="p-2 border-b text-right">0.945 a 1.944</td>
+                            </tr>
+                            <tr class="bg-green-50 font-semibold text-green-800">
+                                <td class="p-2 border-b"><span class="w-2 h-2 inline-block bg-yellow-500 mr-2 rounded-full"></span>3 - Suficiente</td>
+                                <td class="p-2 border-b text-right">1.945 a 2.944</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 border-b"><span class="w-2 h-2 inline-block bg-green-500 mr-2 rounded-full"></span>4 - Bom</td>
+                                <td class="p-2 border-b text-right">2.945 a 3.944</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2 border-b"><span class="w-2 h-2 inline-block bg-green-700 mr-2 rounded-full"></span>5 - Muito bom</td>
+                                <td class="p-2 border-b text-right">3.945 a 5.000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-8 pt-4 border-t border-gray-200 text-center print-only">
+            <p class="text-[10px] text-gray-400 italic">Documento gerado automaticamente pelo Portal de Indicadores de Ensino (SINAES/UEMS) para fins estritamente institucionais.</p>
+        </footer>
+      `;
+      // =======================================================
+      
+      const m = document.getElementById('courseModal'); 
+      m.classList.remove('hidden'); 
+      setTimeout(()=>m.style.opacity='1', 10);
+    }
+
+    function closeModal() { 
+        const m = document.getElementById('courseModal'); 
+        m.style.opacity='0'; 
+        setTimeout(()=>m.classList.add('hidden'), 300); 
+    }
+
+    document.addEventListener('DOMContentLoaded', initTable);
+    
+    ['filterCourse','filterGrau','filterCampus','filterStatus'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.addEventListener('change', renderTable);
+    });
+
+    const resetBtn = document.getElementById('resetFiltersBtn');
+    if(resetBtn) {
+        resetBtn.addEventListener('click', () => { 
+            ['filterCourse','filterGrau','filterCampus','filterStatus'].forEach(id => { 
+                const el = document.getElementById(id);
+                if(el) el.value = ''; 
+            }); 
+            renderTable(); 
+        });
+    }
+  </script>
+</body>
+</html>
