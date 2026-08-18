@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Header } from '@/components/sinaes/header';
-import { TabNavigation } from '@/components/sinaes/tab-navigation';
+import { TabNavigation, type TabType } from '@/components/sinaes/tab-navigation';
 import { TopCards } from '@/components/sinaes/top-cards';
 import { EnadePieChart } from '@/components/sinaes/enade-pie-chart';
 import { CampusCharts } from '@/components/sinaes/campus-charts';
@@ -10,10 +10,9 @@ import { StateComparison } from '@/components/sinaes/state-comparison';
 import { CourseTable } from '@/components/sinaes/course-table';
 import { Enade2025Tab } from '@/components/sinaes/enade-2025-tab';
 import { ForecastTab } from '@/components/sinaes/forecast-tab';
+import { EnadeEvolutionTab } from '@/components/sinaes/enade-evolution-tab';
 import { CourseModal } from '@/components/sinaes/course-modal';
 import { SectionModal } from '@/components/sinaes/section-modal';
-
-type TabType = 'results' | 'enade2025' | 'forecast';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>('results');
@@ -89,6 +88,9 @@ export default function Home() {
 
           {/* ENADE 2025 Tab */}
           {activeTab === 'enade2025' && <Enade2025Tab />}
+
+          {/* ENADE Evolution Tab */}
+          {activeTab === 'evolution' && <EnadeEvolutionTab />}
 
           {/* Forecast Tab */}
           {activeTab === 'forecast' && <ForecastTab />}
