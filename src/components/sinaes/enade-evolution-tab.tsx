@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CalendarRange, Database, GraduationCap, RefreshCw } from 'lucide-react';
+import { CalendarRange, RefreshCw } from 'lucide-react';
 
 const DEFAULT_API_URL =
   'https://script.google.com/macros/s/AKfycbyL7DBMevXocbkr9izJOaJc7B8LdLJyULxuV2bMSkWPEP4h0iyZYe_MinVL18gOyOl4/exec';
@@ -181,14 +181,6 @@ export function EnadeEvolutionTab() {
     });
   }, [courses, filterCode, filterCourse, filterDegree, filterUnit]);
 
-  const latestYear = years.at(-1);
-  const latestNotes = latestYear
-    ? courses.map((course) => course.notas[latestYear]).filter((note): note is number => Boolean(note))
-    : [];
-  const latestAverage = latestNotes.length
-    ? (latestNotes.reduce((sum, note) => sum + note, 0) / latestNotes.length).toFixed(1).replace('.', ',')
-    : '—';
-
   const resetFilters = () => {
     setFilterUnit('');
     setFilterCode('');
@@ -196,7 +188,6 @@ export function EnadeEvolutionTab() {
     setFilterDegree('');
   };
 
-  const columnCount = 4 + years.length;
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -215,8 +206,7 @@ export function EnadeEvolutionTab() {
               Evolução de notas ENADE
             </h2>
             <p className="mt-2 max-w-3xl text-sm font-medium leading-relaxed text-slate-500">
-              Acompanhe a trajetória dos conceitos ENADE por curso e unidade universitária. Os dados são
-              carregados diretamente da planilha publicada pelo Google Apps Script.
+              Acompanhe a trajetória dos conceitos ENADE por curso e unidade universitária.
             </p>
           </div>
           <button
@@ -230,31 +220,6 @@ export function EnadeEvolutionTab() {
           </button>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
-              <GraduationCap className="h-4 w-4 text-[#00338C]" /> Cursos exibidos
-            </div>
-            <p className="mt-2 text-3xl font-black tracking-tight text-slate-950">{filteredCourses.length}</p>
-            <p className="text-xs font-semibold text-slate-400">de {courses.length} registros carregados</p>
-          </div>
-          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
-              <CalendarRange className="h-4 w-4 text-[#00338C]" /> Anos disponíveis
-            </div>
-            <p className="mt-2 text-3xl font-black tracking-tight text-slate-950">{years.length}</p>
-            <p className="text-xs font-semibold text-slate-400">
-              {years.length ? `${years[0]} a ${years.at(-1)}` : 'Aguardando dados'}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
-              <Database className="h-4 w-4 text-[#00338C]" /> Média do último ano
-            </div>
-            <p className="mt-2 text-3xl font-black tracking-tight text-slate-950">{latestAverage}</p>
-            <p className="text-xs font-semibold text-slate-400">{latestYear ? `conceito ${latestYear}` : 'Sem referência'}</p>
-          </div>
-        </div>
       </section>
 
       <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_24px_60px_-10px_rgba(0,34,85,0.08)] md:p-6">
@@ -374,50 +339,54 @@ export function EnadeEvolutionTab() {
             Nenhum dado de evolução foi retornado pela planilha.
           </div>
         ) : (
-          <div className="w-full overflow-x-auto">
-            <table className="w-full min-w-[1050px] text-left text-[11px]">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-600">
-                  <th className="w-[15%] px-3 py-3">Unidade</th>
-                  <th className="w-[8%] px-3 py-3 text-center">Cód.</th>
-                  <th className="w-[19%] px-3 py-3">Curso</th>
-                  <th className="w-[8%] px-3 py-3 text-center">Grau</th>
-                  {years.map((year) => (
-                    <th key={year} className="min-w-14 border-l border-slate-200 px-2 py-3 text-center" title={`ENADE ${year}`}>
-                      {year}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredCourses.length === 0 ? (
-                  <tr>
-                    <td colSpan={columnCount} className="px-4 py-10 text-center text-sm font-semibold text-slate-400">
-                      Nenhum registro encontrado com os filtros aplicados.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredCourses.map((course, index) => (
-                    <tr
-                      key={`${course.codigo}-${course.unidade}`}
-                      className={`${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'} transition-colors hover:bg-blue-50`}
-                    >
-                      <td className="px-3 py-2.5 font-bold leading-tight text-slate-800">{course.unidade || '—'}</td>
-                      <td className="px-3 py-2.5 text-center font-semibold text-slate-500">{course.codigo || '—'}</td>
-                      <td className="px-3 py-2.5 font-bold leading-tight text-slate-800">{course.curso || '—'}</td>
-                      <td className="px-3 py-2.5 text-center text-[10px] font-semibold text-slate-500" title={course.grau}>
-                        {course.grau || '—'}
-                      </td>
-                      {years.map((year) => (
-                        <td key={year} className="border-l border-slate-50 px-2 py-2 text-center">
-                          <NoteBadge note={course.notas[year]} />
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+          <div className="space-y-3">
+            {filteredCourses.length === 0 ? (
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-10 text-center text-sm font-semibold text-slate-400">
+                Nenhum registro encontrado com os filtros aplicados.
+              </div>
+            ) : (
+              filteredCourses.map((course, index) => (
+                <article
+                  key={`${course.codigo}-${course.unidade}`}
+                  className={`${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/60'} rounded-2xl border border-slate-100 p-4 transition-colors hover:border-blue-200 hover:bg-blue-50/40`}
+                >
+                  <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-[minmax(210px,0.55fr)_minmax(0,1.45fr)] xl:items-center">
+                    <div className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4 xl:grid-cols-2">
+                      <div className="min-w-0 sm:col-span-2 lg:col-span-1">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Curso</p>
+                        <p className="break-words text-sm font-black leading-tight text-slate-800">{course.curso || '—'}</p>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Unidade</p>
+                        <p className="break-words text-xs font-bold leading-tight text-slate-700">{course.unidade || '—'}</p>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Código</p>
+                        <p className="text-xs font-semibold text-slate-500">{course.codigo || '—'}</p>
+                      </div>
+                      <div className="min-w-0 sm:col-span-2 lg:col-span-1">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Grau</p>
+                        <p className="break-words text-xs font-semibold text-slate-500">{course.grau || '—'}</p>
+                      </div>
+                    </div>
+
+                    <div className="min-w-0 rounded-xl border border-slate-100 bg-white/80 p-3">
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-[#00338C]">Histórico de conceitos</p>
+                      </div>
+                      <div className="flex flex-wrap gap-x-2 gap-y-2 xl:flex-nowrap xl:justify-between xl:gap-x-1.5">
+                        {years.map((year) => (
+                          <div key={year} className="flex min-w-8 flex-col items-center gap-1">
+                            <span className="text-[9px] font-bold tabular-nums text-slate-400">{year}</span>
+                            <NoteBadge note={course.notas[year]} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))
+            )}
           </div>
         )}
       </section>

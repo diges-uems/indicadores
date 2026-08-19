@@ -24,16 +24,16 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
           ENADE 2025
         </button>
         <button
-          className={`tab-btn ${activeTab === 'evolution' ? 'active' : ''} pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold`}
-          onClick={() => onTabChange('evolution')}
-        >
-          Evolução ENADE
-        </button>
-        <button
           className={`tab-btn ${activeTab === 'forecast' ? 'active' : ''} pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold`}
           onClick={() => onTabChange('forecast')}
         >
           Previsão ENADE (2026-2028)
+        </button>
+        <button
+          className={`tab-btn ${activeTab === 'evolution' ? 'active' : ''} pb-3 text-base md:text-lg text-slate-950 hover:text-[#00338C] uppercase tracking-wider font-semibold`}
+          onClick={() => onTabChange('evolution')}
+        >
+          Evolução ENADE
         </button>
       </div>
     </div>
