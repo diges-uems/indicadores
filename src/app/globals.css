@@ -234,7 +234,8 @@
   #main-wrapper,
   [role="dialog"],
   [data-radix-overlay],
-  .fixed inset-0 {
+  [data-slot="dialog-overlay"],
+  .fixed.inset-0 {
     display: none !important;
   }
 
