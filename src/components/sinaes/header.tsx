@@ -5,7 +5,7 @@ export function Header() {
     <header className="relative w-full max-w-7xl mx-auto mt-6 px-4 sm:px-8 mb-6 animate-fade-in">
       <div className="relative w-full min-h-[350px] rounded-[2rem] overflow-hidden shadow-2xl shadow-blue-900/10">
         <img
-          src="https://www.uems.br/anexos/imagens/conteudo/uems_imagens_2023-09-22_13-02-19.png"
+          src="https://nkqzmawfofgnynvywzbd.supabase.co/storage/v1/object/public/icon/ChatGPT%20Image%2023%20de%20set.%20de%202026%2C%2011_02_47.png"
           alt="Fachada principal UEMS"
           className="absolute inset-0 w-full h-full object-cover object-center"
           onError={(e) => {
