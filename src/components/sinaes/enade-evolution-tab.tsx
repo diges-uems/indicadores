@@ -85,6 +85,27 @@ function normalizePayload(payload: unknown): EvolutionCourse[] {
     .filter((course) => Object.keys(course.notas).length > 0);
 }
 
+// Cursos que ainda não estão na planilha. Saem daqui assim que a planilha tiver o mesmo código.
+const FALLBACK_COURSES: EvolutionCourse[] = [
+  {
+    unidade: 'Ponta Porã',
+    codigo: '68319',
+    curso: 'Ciências Econômicas',
+    grau: 'Bacharelado',
+    notas: { 2009: 2, 2012: 2, 2015: 3, 2018: 2, 2022: 2 },
+  },
+];
+
+function withFallbackCourses(courses: EvolutionCourse[]): EvolutionCourse[] {
+  const result = [...courses];
+  FALLBACK_COURSES.forEach((extra) => {
+    if (result.some((course) => course.codigo === extra.codigo)) return;
+    const index = result.findIndex((course) => course.curso.localeCompare(extra.curso, 'pt-BR') > 0);
+    result.splice(index === -1 ? result.length : index, 0, extra);
+  });
+  return result;
+}
+
 function NoteBadge({ note }: { note: number | undefined }) {
   if (!note) {
     return <span className="text-sm font-bold text-slate-300">—</span>;
@@ -127,7 +148,7 @@ export function EnadeEvolutionTab() {
       }
 
       const payload: unknown = await response.json();
-      setCourses(normalizePayload(payload));
+      setCourses(withFallbackCourses(normalizePayload(payload)));
       setLastUpdated(new Date());
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'Não foi possível carregar os dados da planilha.';
